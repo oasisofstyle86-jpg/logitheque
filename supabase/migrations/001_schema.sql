@@ -27,6 +27,10 @@ drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+-- Fonction interne du déclencheur : personne n'a besoin de l'appeler directement
+revoke execute on function public.handle_new_user() from public, anon, authenticated;
+-- is_admin() reste appelable : les règles de sécurité en ont besoin, et elle ne révèle
+-- que le statut de la personne connectée.
 
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = public as $$
