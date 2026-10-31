@@ -1,0 +1,985 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Logithèque Boutique</title>
+<meta name="description" content="Logiciels de gestion, de formation et de commerce. Licence livrée immédiatement après paiement.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Familjen+Grotesk:wght@500;600;700&family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)} body{margin:0} img{max-width:100%} [hidden]{display:none!important}</style>
+<style>
+/* Mise en page : rayonnage de magasin — bandeau de recherche, rayons (catégories), étagères de boîtes logicielles */
+:root{
+  --bg:#F3F5F8; --surface:#FFFFFF; --sunk:#E8ECF2; --line:#D6DCE5;
+  --ink:#121C27; --muted:#5A6676; --accent:#1C4ED8; --accent-ink:#FFFFFF; --accent-soft:#E3EAFC;
+  --promo:#C2410C; --promo-soft:#FDEDE3; --ok:#15803D; --ok-soft:#E3F4E8; --warn:#B45309; --bad:#B91C1C; --bad-soft:#FBE7E7;
+  --head:#0F1A26; --head-ink:#F2F5F9; --head-muted:#9AA8BA;
+  --f-display:"Familjen Grotesk","Helvetica Neue",Arial,sans-serif;
+  --f-body:"Public Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:10px; --r-sm:6px;
+  --shadow:0 1px 2px rgba(18,28,39,.06),0 4px 14px rgba(18,28,39,.06);
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D141C; --surface:#151F2A; --sunk:#1B2733; --line:#2A3846;
+  --ink:#E7ECF2; --muted:#93A1B2; --accent:#7EA2FF; --accent-ink:#0B1220; --accent-soft:#1B2A4A;
+  --promo:#FB923C; --promo-soft:#3A2416; --ok:#4ADE80; --ok-soft:#14301F; --warn:#FBBF24; --bad:#F87171; --bad-soft:#3A1A1A;
+  --head:#080E15; --head-ink:#E7ECF2; --head-muted:#8494A7;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0D141C; --surface:#151F2A; --sunk:#1B2733; --line:#2A3846;
+  --ink:#E7ECF2; --muted:#93A1B2; --accent:#7EA2FF; --accent-ink:#0B1220; --accent-soft:#1B2A4A;
+  --promo:#FB923C; --promo-soft:#3A2416; --ok:#4ADE80; --ok-soft:#14301F; --warn:#FBBF24; --bad:#F87171; --bad-soft:#3A1A1A;
+  --head:#080E15; --head-ink:#E7ECF2; --head-muted:#8494A7;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 6px 18px rgba(0,0,0,.3); color-scheme:dark }
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:15px/1.55 var(--f-body);-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--head)}
+a{color:var(--accent)}
+h1,h2,h3{font-family:var(--f-display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:clamp(1.7rem,1.2rem + 2vw,2.5rem);font-weight:700;letter-spacing:-.01em}
+h2{font-size:1.35rem;font-weight:700}
+h3{font-size:1.05rem;font-weight:600}
+p{margin:0}
+.wrap{max-width:1200px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.mono{font-family:var(--f-mono)}
+.muted{color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* ---------- En-tête ---------- */
+.demo-bar{background:var(--promo-soft);color:var(--promo);font-size:13px;font-weight:600}
+.demo-bar .wrap{padding-block:7px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+header.top{background:var(--head);color:var(--head-ink);position:sticky;top:env(safe-area-inset-top,0px);z-index:20}
+.top-row{display:grid;grid-template-columns:auto 1fr auto;gap:20px;align-items:center;padding-block:14px}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--head-ink);cursor:pointer;background:none;border:0;padding:0}
+.logo-mark{width:34px;height:34px;border-radius:8px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;font:700 15px var(--f-mono)}
+.logo-name{font:700 1.25rem var(--f-display);letter-spacing:-.01em}
+.search{display:flex;background:var(--surface);border-radius:999px;overflow:hidden;min-width:0}
+.search input{flex:1;min-width:0;border:0;background:transparent;padding:10px 18px;color:var(--ink);outline:none}
+.search button{border:0;background:var(--accent);color:var(--accent-ink);padding:0 20px;font-weight:600;cursor:pointer}
+.top-actions{display:flex;gap:6px}
+.icon-btn{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid transparent;color:var(--head-ink);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:500;white-space:nowrap}
+.icon-btn:hover{border-color:#ffffff30}
+.icon-btn svg{width:20px;height:20px;flex:none}
+.badge{background:var(--promo);color:#fff;font:600 11px var(--f-body);min-width:19px;height:19px;border-radius:999px;display:inline-grid;place-items:center;padding:0 5px}
+nav.rayons{border-top:1px solid #ffffff14}
+nav.rayons .wrap{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;padding-block:4px}
+nav.rayons button{background:none;border:0;color:var(--head-muted);padding:8px 12px;border-radius:6px;cursor:pointer;white-space:nowrap;font-size:14px;font-weight:500}
+nav.rayons button:hover,nav.rayons button[aria-current="true"]{color:var(--head-ink);background:#ffffff12}
+@media (max-width:720px){
+  .top-row{grid-template-columns:1fr auto;gap:12px}
+  .search{grid-column:1/-1;order:3}
+  .icon-btn .lbl{display:none}
+}
+
+main{padding-block:28px 64px;display:grid;gap:40px}
+
+/* ---------- Boutons ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:var(--r-sm);border:1px solid var(--line);background:var(--surface);padding:10px 16px;font-weight:600;cursor:pointer;text-decoration:none;color:var(--ink)}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn.primary:hover{filter:brightness(1.08)}
+.btn.big{padding:14px 22px;font-size:16px}
+.btn.small{padding:6px 10px;font-size:13px}
+.btn.ghost{background:transparent}
+.btn.danger{color:var(--bad)}
+.btn:disabled{opacity:.55;cursor:not-allowed}
+.link{background:none;border:0;padding:0;color:var(--accent);cursor:pointer;font-weight:600}
+
+/* ---------- Pochette logicielle générée ---------- */
+.cover{position:relative;aspect-ratio:4/3;max-width:100%;border-radius:var(--r-sm);overflow:hidden;
+  background:linear-gradient(135deg,hsl(var(--h) 62% 44%),hsl(calc(var(--h) + 38) 58% 30%));color:#fff;display:flex;flex-direction:column;justify-content:space-between;padding:14px}
+.cover::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,#ffffff10 0 1px,transparent 1px 18px),repeating-linear-gradient(0deg,#ffffff10 0 1px,transparent 1px 18px);pointer-events:none}
+.cover .mk{font:700 clamp(1.4rem,4vw,2.2rem) var(--f-display);letter-spacing:-.02em;position:relative;z-index:1}
+.cover .meta{font:500 11px var(--f-mono);opacity:.85;position:relative;z-index:1;display:flex;justify-content:space-between;gap:8px}
+.cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+/* ---------- Bandeau d'accueil ---------- */
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:28px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:28px;box-shadow:var(--shadow)}
+.hero .eyebrow{font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--promo)}
+.hero-copy{display:grid;gap:14px;min-width:0}
+.hero-copy p{color:var(--muted);max-width:52ch}
+.hero-buy{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+@media (max-width:760px){.hero{grid-template-columns:1fr;padding:20px}.hero .cover{order:-1}}
+
+.promises{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.promise{display:flex;gap:12px;align-items:flex-start;padding:14px;border-radius:var(--r);background:var(--sunk)}
+.promise svg{width:22px;height:22px;flex:none;color:var(--accent)}
+.promise b{display:block;font-size:14px}
+.promise span{font-size:13px;color:var(--muted)}
+@media (max-width:900px){.promises{grid-template-columns:1fr 1fr}}
+@media (max-width:480px){.promises{grid-template-columns:1fr}}
+
+.section-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+
+/* ---------- Grille produits ---------- */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:12px;display:grid;grid-template-rows:auto 1fr auto;gap:12px;cursor:pointer;transition:border-color .15s,transform .15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.card-body{display:grid;gap:6px;align-content:start;min-width:0}
+.card-body .tag{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.price{font:700 1.15rem var(--f-display);font-variant-numeric:tabular-nums}
+.price .per{font:500 12px var(--f-body);color:var(--muted)}
+.was{color:var(--muted);text-decoration:line-through;font-size:13px;margin-left:6px;font-weight:400}
+.pill{display:inline-flex;align-items:center;gap:4px;font:600 11px var(--f-body);padding:3px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.pill.promo{background:var(--promo-soft);color:var(--promo)}
+.pill.ok{background:var(--ok-soft);color:var(--ok)}
+.pill.bad{background:var(--bad-soft);color:var(--bad)}
+.pill.accent{background:var(--accent-soft);color:var(--accent)}
+.pills{display:flex;gap:6px;flex-wrap:wrap}
+.stars{color:#E0A100;letter-spacing:1px;font-size:13px}
+.rating{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted)}
+
+.rayon-tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px}
+.rayon-tile{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;text-align:left;cursor:pointer;display:grid;gap:4px}
+.rayon-tile:hover{border-color:var(--accent)}
+.rayon-tile .ico{font-size:22px}
+.rayon-tile span{font-size:13px;color:var(--muted)}
+
+/* ---------- Catalogue ---------- */
+.catalog{display:grid;grid-template-columns:240px 1fr;gap:24px;align-items:start}
+.filters{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:18px;position:sticky;top:calc(env(safe-area-inset-top,0px) + 130px)}
+.filters fieldset{border:0;padding:0;margin:0;display:grid;gap:6px}
+.filters legend{font:600 12px var(--f-body);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:6px}
+.filters label{display:flex;gap:8px;align-items:center;font-size:14px;cursor:pointer}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+select,input[type=text],input[type=email],input[type=password],input[type=number],input[type=search],textarea{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 12px;width:100%;color:var(--ink)}
+.toolbar select{width:auto}
+textarea{min-height:90px;resize:vertical}
+@media (max-width:820px){.catalog{grid-template-columns:1fr}.filters{position:static}}
+
+/* ---------- Fiche produit ---------- */
+.crumbs{font-size:13px;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.crumbs button{background:none;border:0;padding:0;color:var(--muted);cursor:pointer}
+.crumbs button:hover{color:var(--accent)}
+.pdp{display:grid;grid-template-columns:1fr 1fr 320px;gap:28px;align-items:start}
+.pdp-info{display:grid;gap:14px;min-width:0}
+.buybox{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px;box-shadow:var(--shadow);position:sticky;top:calc(env(safe-area-inset-top,0px) + 130px)}
+.buybox .price{font-size:2rem}
+.spec{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:14px}
+.spec dt{color:var(--muted)}
+.spec dd{margin:0;font-weight:500}
+.checks{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.checks li{display:flex;gap:10px;font-size:14px}
+.checks li::before{content:"";flex:none;width:18px;height:18px;margin-top:2px;border-radius:50%;background:var(--ok-soft) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3E%3Cpath d='M5 10.5l3 3 7-7' fill='none' stroke='%2315803D' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/14px no-repeat}
+.tabs{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:10px 14px;cursor:pointer;color:var(--muted);font-weight:600;white-space:nowrap}
+.tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab-panel{padding-top:18px;max-width:75ch}
+.tab-panel p+p{margin-top:10px}
+.review{border-bottom:1px solid var(--line);padding-block:14px;display:grid;gap:4px}
+@media (max-width:1000px){.pdp{grid-template-columns:1fr 1fr}.buybox{grid-column:1/-1;position:static}}
+@media (max-width:640px){.pdp{grid-template-columns:1fr}}
+
+/* ---------- Panier / Compte ---------- */
+.two-col{display:grid;grid-template-columns:1fr 340px;gap:24px;align-items:start}
+@media (max-width:860px){.two-col{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:20px;display:grid;gap:14px;min-width:0}
+.line{display:grid;grid-template-columns:96px 1fr auto;gap:16px;align-items:center;padding-block:14px;border-bottom:1px solid var(--line)}
+.line:last-child{border-bottom:0}
+.line .cover{padding:8px}.line .cover .mk{font-size:1.1rem}.line .cover .meta{display:none}
+.qty{display:inline-flex;border:1px solid var(--line);border-radius:var(--r-sm);overflow:hidden}
+.qty button{background:var(--sunk);border:0;width:30px;cursor:pointer;font-weight:700}
+.qty span{min-width:34px;text-align:center;padding:4px 0}
+.totals{display:grid;gap:8px}
+.totals div{display:flex;justify-content:space-between}
+.totals .grand{font:700 1.3rem var(--f-display);border-top:1px solid var(--line);padding-top:10px}
+@media (max-width:520px){.line{grid-template-columns:64px 1fr}.line>.end{grid-column:2}}
+.empty{text-align:center;padding:48px 16px;display:grid;gap:12px;justify-items:center}
+.form{display:grid;gap:12px}
+.field{display:grid;gap:5px}
+.field label{font-size:13px;font-weight:600}
+.field small{color:var(--muted);font-size:12px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:520px){.row2{grid-template-columns:1fr}}
+.notice{padding:12px 14px;border-radius:var(--r-sm);font-size:14px;background:var(--accent-soft);color:var(--ink)}
+.notice.bad{background:var(--bad-soft);color:var(--bad)}
+.notice.ok{background:var(--ok-soft);color:var(--ok)}
+
+.side-nav{display:grid;gap:2px}
+.side-nav button{text-align:left;background:none;border:0;padding:9px 12px;border-radius:var(--r-sm);cursor:pointer;font-weight:500}
+.side-nav button[aria-current="true"]{background:var(--accent-soft);color:var(--accent)}
+.acct{display:grid;grid-template-columns:220px 1fr;gap:24px;align-items:start}
+@media (max-width:760px){.acct{grid-template-columns:1fr}}
+
+.license{border:1px solid var(--line);border-radius:var(--r);padding:16px;display:grid;gap:12px;background:var(--surface)}
+.license-head{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.key{display:flex;gap:8px;align-items:center;background:var(--sunk);border-radius:var(--r-sm);padding:10px 12px;font:500 15px var(--f-mono);letter-spacing:.04em;overflow-x:auto}
+.key code{flex:1;white-space:nowrap;user-select:all}
+
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:999px;font-weight:600;z-index:50;box-shadow:var(--shadow);max-width:calc(100vw - 32px)}
+footer.foot{background:var(--head);color:var(--head-muted);font-size:13px}
+footer.foot .wrap{padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<div id="demo-bar" class="demo-bar" hidden><div class="wrap">Mode démonstration : les produits, avis et licences affichés sont des exemples. Renseignez la configuration Supabase pour passer en boutique réelle.</div></div>
+
+<header class="top">
+  <div class="wrap top-row">
+    <button class="logo" data-go="" aria-label="Accueil">
+      <span class="logo-mark" id="logo-mark">LG</span>
+      <span class="logo-name" id="logo-name">Logithèque</span>
+    </button>
+    <form class="search" id="search-form" role="search">
+      <input id="search-input" type="search" placeholder="Rechercher un logiciel, une fonctionnalité…" aria-label="Rechercher">
+      <button type="submit">Chercher</button>
+    </form>
+    <div class="top-actions">
+      <button class="icon-btn" data-go="compte" id="account-btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
+        <span class="lbl" id="account-lbl">Mon compte</span>
+      </button>
+      <button class="icon-btn" data-go="panier">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6"/><circle cx="10" cy="20.5" r="1.2"/><circle cx="17" cy="20.5" r="1.2"/></svg>
+        <span class="lbl">Panier</span><span class="badge num" id="cart-count">0</span>
+      </button>
+    </div>
+  </div>
+  <nav class="rayons" aria-label="Rayons"><div class="wrap" id="rayons"></div></nav>
+</header>
+
+<main class="wrap" id="view" aria-live="polite"></main>
+
+<footer class="foot">
+  <div class="wrap">
+    <span id="foot-name">Logithèque</span>
+    <span>Paiement sécurisé par Stripe · Licence envoyée immédiatement après paiement</span>
+    <span id="foot-support"></span>
+  </div>
+</footer>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+/* ======================================================================
+   CONFIGURATION — à remplir pour passer en boutique réelle
+   (laisser SUPABASE_URL vide = mode démonstration)
+   ====================================================================== */
+const CONFIG = {
+  SHOP_NAME: "Logithèque",
+  SUPABASE_URL: "",          // ex. https://abcd1234.supabase.co
+  SUPABASE_ANON_KEY: "",     // clé "anon" / "publishable" (publique, sans danger)
+  CURRENCY: "usd",           // même devise que la fonction create-checkout
+  SUPPORT_EMAIL: "",         // affiché en pied de page
+};
+
+/* ====================================================================== */
+const DEMO = !CONFIG.SUPABASE_URL;
+const sb = !DEMO && window.supabase ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY) : null;
+const $ = (s, el = document) => el.querySelector(s);
+const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const money = (cents) => new Intl.NumberFormat("fr-FR", { style: "currency", currency: CONFIG.CURRENCY.toUpperCase() }).format((cents || 0) / 100);
+const PER = { one_time: "", monthly: " / mois", yearly: " / an" };
+const BILLING_LABEL = { one_time: "Licence à vie", monthly: "Abonnement mensuel", yearly: "Abonnement annuel" };
+const PLATFORMS = ["Windows", "macOS", "Linux", "Android", "iOS", "Web"];
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+};
+
+const S = {
+  categories: [], products: [], ratings: {}, reviews: {},
+  user: null, profile: null, recovery: false,
+  cart: store.get("cart", []),
+  search: "", filters: { cats: [], plats: [], billing: "", sort: "pop" },
+  tab: "desc", authMode: "login", editing: null,
+  demoLicenses: [], demoOrders: [],
+};
+
+/* ---------------- Données de démonstration ---------------- */
+const DEMO_DATA = (() => {
+  const categories = [
+    { id: 1, slug: "gestion", name: "Gestion & Comptabilité", icon: "📊" },
+    { id: 2, slug: "education", name: "Éducation & Formation", icon: "🎓" },
+    { id: 3, slug: "commerce", name: "Commerce & Caisse", icon: "🛒" },
+    { id: 4, slug: "productivite", name: "Productivité", icon: "⚡" },
+    { id: 5, slug: "mobile", name: "Applications mobiles", icon: "📱" },
+    { id: 6, slug: "outils-dev", name: "Outils développeurs", icon: "🧩" },
+  ];
+  const P = (o) => ({ is_published: true, is_featured: false, compare_at_cents: null, screenshots: [], cover_url: null, ...o });
+  const products = [
+    P({ id: "d1", slug: "caisse-pro", name: "Caisse Pro", category_id: 3, price_cents: 4900, compare_at_cents: 6900, billing: "one_time", version: "3.2", platforms: ["Windows", "macOS"], is_featured: true,
+      tagline: "Encaissements, tickets et clôture de caisse en fin de journée.",
+      description: "Caisse Pro enregistre chaque vente, imprime le ticket et calcule la clôture de caisse en fin de journée. Il fonctionne sans connexion internet et synchronise les données dès que le réseau revient.\n\nPensé pour les boutiques, les centres de formation et les petits commerces qui encaissent en espèces et par paiement mobile.",
+      features: ["Ventes en espèces, carte et paiement mobile", "Clôture de caisse avec écart signalé", "Fonctionne hors ligne", "Export Excel et PDF", "Plusieurs caissiers avec droits séparés"],
+      requirements: "Windows 10 ou plus récent, ou macOS 12 et plus. 4 Go de RAM. 300 Mo d'espace disque. Imprimante ticket 58 ou 80 mm (facultative)." }),
+    P({ id: "d2", slug: "ecole-plus", name: "École+", category_id: 2, price_cents: 19900, billing: "yearly", version: "1.8", platforms: ["Web", "Android"],
+      tagline: "Inscriptions, écolage et présences des élèves au même endroit.",
+      description: "École+ suit les inscriptions, les paiements d'écolage et les présences de chaque élève. Les retards de paiement apparaissent en rouge sur le tableau de bord.",
+      features: ["Fiche élève avec historique des paiements", "Feuille de présence sur téléphone", "Relances d'écolage", "Reçus imprimables"],
+      requirements: "Navigateur récent (Chrome, Firefox, Safari). Application Android 9 et plus." }),
+    P({ id: "d3", slug: "paie-avances", name: "Paie & Avances", category_id: 1, price_cents: 5900, billing: "one_time", version: "2.1", platforms: ["Windows", "macOS"], is_featured: true,
+      tagline: "Salaires, avances et bulletins de paie de vos employés.",
+      description: "Enregistrez les avances au fil du mois : elles sont déduites automatiquement du salaire. Le bulletin de paie se génère en PDF.",
+      features: ["Avances déduites automatiquement", "Bulletins PDF", "Historique par employé", "Sauvegarde sur clé USB"],
+      requirements: "Windows 10+ ou macOS 12+. 200 Mo d'espace disque." }),
+    P({ id: "d4", slug: "stock-facile", name: "Stock Facile", category_id: 3, price_cents: 3900, billing: "one_time", version: "1.4", platforms: ["Windows", "Android"],
+      tagline: "Entrées, sorties et alertes de rupture de stock.",
+      description: "Scannez ou saisissez les articles, suivez les mouvements de stock et recevez une alerte avant la rupture.",
+      features: ["Lecture de codes-barres", "Alerte de stock minimum", "Inventaire guidé", "Valeur du stock en temps réel"],
+      requirements: "Windows 10+ ou Android 9+." }),
+    P({ id: "d5", slug: "agenda-formations", name: "Agenda Formations", category_id: 2, price_cents: 1500, billing: "monthly", version: "2.0", platforms: ["Web"],
+      tagline: "Planning des sessions, inscriptions en ligne et rappels.",
+      description: "Publiez vos sessions de formation, laissez les participants s'inscrire et envoyez des rappels la veille.",
+      features: ["Page d'inscription publique", "Liste d'attente automatique", "Rappels la veille", "Export des participants"],
+      requirements: "Navigateur récent." }),
+    P({ id: "d6", slug: "facture-express", name: "Facture Express", category_id: 1, price_cents: 2500, compare_at_cents: 3500, billing: "one_time", version: "4.0", platforms: ["Windows", "macOS", "Linux"],
+      tagline: "Devis et factures PDF en moins d'une minute.",
+      description: "Créez un devis, transformez-le en facture en un clic et suivez les paiements reçus.",
+      features: ["Devis convertible en facture", "Numérotation automatique", "Logo et mentions personnalisés", "Suivi des impayés"],
+      requirements: "Windows 10+, macOS 12+ ou Linux (Ubuntu 22.04+)." }),
+    P({ id: "d7", slug: "carnet-sync", name: "Carnet Sync", category_id: 5, price_cents: 900, billing: "monthly", version: "1.2", platforms: ["Android", "iOS"],
+      tagline: "Notes et listes hors ligne, synchronisées entre vos appareils.",
+      description: "Prenez des notes même sans réseau ; tout se synchronise dès que vous êtes connecté.",
+      features: ["Mode hors ligne complet", "Partage de listes", "Rappels", "Chiffrement des notes"],
+      requirements: "Android 9+ ou iOS 15+." }),
+    P({ id: "d8", slug: "kit-webhooks", name: "Kit Webhooks", category_id: 6, price_cents: 7900, billing: "one_time", version: "0.9", platforms: ["Linux", "macOS", "Windows"],
+      tagline: "Recevoir, vérifier et rejouer des webhooks de paiement.",
+      description: "Une petite boîte à outils pour développeurs : réception de webhooks, vérification de signature, journal et rejeu.",
+      features: ["Vérification de signature", "Journal consultable", "Rejeu d'un événement", "Docker prêt à l'emploi"],
+      requirements: "Docker 24+ ou Node.js 20+." }),
+  ];
+  const ratings = { d1: { avg_rating: 4.7, review_count: 23 }, d2: { avg_rating: 4.5, review_count: 11 }, d3: { avg_rating: 4.8, review_count: 17 }, d4: { avg_rating: 4.2, review_count: 8 }, d6: { avg_rating: 4.6, review_count: 31 }, d5: { avg_rating: 4.0, review_count: 4 } };
+  const reviews = {
+    d1: [{ author_name: "Hery R. (exemple)", rating: 5, comment: "La clôture de caisse me fait gagner une demi-heure chaque soir.", created_at: "2026-09-12" },
+         { author_name: "Fara A. (exemple)", rating: 4, comment: "Très simple. J'aimerais un export par caissier.", created_at: "2026-08-30" }],
+    d3: [{ author_name: "Tiana M. (exemple)", rating: 5, comment: "Les avances sont enfin bien suivies.", created_at: "2026-10-02" }],
+  };
+  return { categories, products, ratings, reviews };
+})();
+
+/* ---------------- Accès aux données ---------------- */
+const api = {
+  async catalog() {
+    if (DEMO) {
+      S.categories = DEMO_DATA.categories; S.products = DEMO_DATA.products; S.ratings = DEMO_DATA.ratings; return;
+    }
+    const [c, p, r] = await Promise.all([
+      sb.from("categories").select("*").order("position"),
+      sb.from("products").select("*").order("created_at", { ascending: false }),
+      sb.from("product_ratings").select("*"),
+    ]);
+    if (c.error || p.error) throw c.error || p.error;
+    S.categories = c.data; S.products = p.data;
+    S.ratings = Object.fromEntries((r.data || []).map((x) => [x.product_id, x]));
+  },
+  async reviews(pid) {
+    if (DEMO) return DEMO_DATA.reviews[pid] || [];
+    const { data } = await sb.from("reviews").select("*").eq("product_id", pid).order("created_at", { ascending: false }).limit(50);
+    return data || [];
+  },
+  async licenses() {
+    if (DEMO) return S.demoLicenses;
+    const { data, error } = await sb.from("licenses")
+      .select("id, license_key, status, activations, max_activations, created_at, product_id, products(name, slug, version, platforms, file_path)")
+      .order("created_at", { ascending: false });
+    if (error) throw error; return data;
+  },
+  async orders() {
+    if (DEMO) return S.demoOrders;
+    const { data, error } = await sb.from("orders").select("id, status, total_cents, currency, created_at, paid_at, order_items(product_name, quantity, unit_cents)")
+      .neq("status", "pending").order("created_at", { ascending: false });
+    if (error) throw error; return data;
+  },
+  async invoke(fn, body) {
+    const { data, error } = await sb.functions.invoke(fn, { body });
+    if (error) {
+      let msg = error.message;
+      try { const j = await error.context.json(); msg = j.error || msg; } catch {}
+      throw new Error(msg);
+    }
+    return data;
+  },
+};
+
+/* ---------------- Utilitaires d'affichage ---------------- */
+function hue(s) { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360; return h; }
+function initials(n) { return n.replace(/[^\p{L}\p{N} &+]/gu, "").split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join("").toUpperCase(); }
+function cover(p) {
+  const img = p.cover_url ? `<img src="${esc(p.cover_url)}" alt="">` : "";
+  return `<div class="cover" style="--h:${hue(p.slug)}">${img}
+    <span class="mk">${esc(img ? "" : p.name)}</span>
+    <span class="meta">${img ? "" : `<span>v${esc(p.version || "1.0")}</span><span>${esc((p.platforms || []).join(" · "))}</span>`}</span></div>`;
+}
+function stars(v) { const n = Math.round(v); return `<span class="stars" aria-label="${v} sur 5">${"★".repeat(n)}${"☆".repeat(5 - n)}</span>`; }
+function ratingLine(p) {
+  const r = S.ratings[p.id]; if (!r) return `<span class="rating">Nouveau</span>`;
+  return `<span class="rating">${stars(r.avg_rating)} <span class="num">${String(r.avg_rating).replace(".", ",")} (${r.review_count})</span></span>`;
+}
+function priceHtml(p) {
+  return `<span class="price">${money(p.price_cents)}<span class="per">${PER[p.billing]}</span>${p.compare_at_cents > p.price_cents ? `<span class="was">${money(p.compare_at_cents)}</span>` : ""}</span>`;
+}
+function discount(p) { return p.compare_at_cents > p.price_cents ? Math.round(100 - (p.price_cents * 100) / p.compare_at_cents) : 0; }
+function card(p) {
+  const d = discount(p);
+  return `<article class="card" data-go="p-${esc(p.slug)}" tabindex="0">
+    ${cover(p)}
+    <div class="card-body">
+      <div class="pills">${d ? `<span class="pill promo">−${d} %</span>` : ""}${p.billing !== "one_time" ? `<span class="pill accent">Abonnement</span>` : ""}</div>
+      <h3>${esc(p.name)}</h3>
+      <p class="tag">${esc(p.tagline)}</p>
+      ${ratingLine(p)}
+    </div>
+    <div class="card-foot">${priceHtml(p)}
+      <button class="btn small primary" data-add="${p.id}" aria-label="Ajouter ${esc(p.name)} au panier">Ajouter</button></div>
+  </article>`;
+}
+const cat = (id) => S.categories.find((c) => c.id === id);
+const prod = (id) => S.products.find((p) => p.id === id);
+const visible = () => S.products.filter((p) => p.is_published);
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => (t.hidden = true), 2800); }
+const isAdmin = () => (DEMO ? !!S.user : !!S.profile?.is_admin);
+
+/* ---------------- Panier ---------------- */
+function saveCart() { store.set("cart", S.cart); $("#cart-count").textContent = S.cart.reduce((s, l) => s + l.qty, 0); }
+function addToCart(id) {
+  const p = prod(id); if (!p) return;
+  if (p.billing !== "one_time") { S.cart = [{ id, qty: 1 }]; saveCart(); toast("Abonnement ajouté. Il se paie seul, le panier a été vidé."); return; }
+  S.cart = S.cart.filter((l) => prod(l.id)?.billing === "one_time");
+  const l = S.cart.find((x) => x.id === id);
+  if (l) l.qty = Math.min(l.qty + 1, 50); else S.cart.push({ id, qty: 1 });
+  saveCart(); toast(`${p.name} ajouté au panier`);
+}
+const cartLines = () => S.cart.map((l) => ({ ...l, p: prod(l.id) })).filter((l) => l.p);
+const cartTotal = () => cartLines().reduce((s, l) => s + l.p.price_cents * l.qty, 0);
+
+async function checkout(btn) {
+  if (!cartLines().length) return;
+  if (!S.user) { S.authMode = "login"; go("compte"); toast("Connectez-vous pour finaliser l'achat"); return; }
+  if (DEMO) {
+    const order = { id: "demo-" + Date.now(), status: "paid", total_cents: cartTotal(), created_at: new Date().toISOString(),
+      order_items: cartLines().map((l) => ({ product_name: l.p.name, quantity: l.qty, unit_cents: l.p.price_cents })) };
+    S.demoOrders.unshift(order);
+    cartLines().forEach((l) => { for (let i = 0; i < l.qty; i++) S.demoLicenses.unshift({ id: crypto.randomUUID(), license_key: demoKey(), status: "active", activations: 0, max_activations: 1, created_at: order.created_at, product_id: l.p.id, products: l.p }); });
+    go("merci"); return;
+  }
+  btn.disabled = true; btn.textContent = "Redirection vers le paiement…";
+  try {
+    const { url } = await api.invoke("create-checkout", { items: S.cart.map((l) => ({ product_id: l.id, quantity: l.qty })) });
+    location.href = url;
+  } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "Payer en toute sécurité"; }
+}
+function demoKey() { const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return [0, 1, 2, 3].map(() => Array.from({ length: 5 }, () => a[Math.floor(Math.random() * a.length)]).join("")).join("-"); }
+
+/* ---------------- Navigation ---------------- */
+function go(name) { if (location.hash.slice(1) === name) render(); else location.hash = name; }
+function route() {
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (/access_token|error_description|type=/.test(h)) return "compte"; // retour de lien e-mail Supabase
+  return h;
+}
+
+function render() {
+  const r = route();
+  const v = $("#view");
+  document.querySelectorAll("#rayons button").forEach((b) => b.setAttribute("aria-current", String(b.dataset.go === r)));
+  let html;
+  if (!r) html = viewHome();
+  else if (r === "catalogue" || r === "recherche") html = viewCatalog();
+  else if (r.startsWith("c-")) { const c = S.categories.find((x) => x.slug === r.slice(2)); S.filters.cats = c ? [c.id] : []; html = viewCatalog(c); }
+  else if (r.startsWith("p-")) html = viewProduct(r.slice(2));
+  else if (r === "panier") html = viewCart();
+  else if (r === "merci") html = viewThanks();
+  else if (["compte", "licences", "commandes", "admin"].includes(r)) html = viewAccount(r);
+  else html = viewHome();
+  v.innerHTML = html;
+  afterRender(r);
+  window.scrollTo({ top: 0 });
+}
+
+/* ---------------- Vues ---------------- */
+const ICONS = {
+  lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>',
+  key: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/></svg>',
+  down: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>',
+  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/></svg>',
+};
+
+function viewHome() {
+  const all = visible();
+  const hero = all.find((p) => p.is_featured) || all[0];
+  const promos = all.filter((p) => discount(p) > 0);
+  const best = [...all].sort((a, b) => (S.ratings[b.id]?.review_count || 0) - (S.ratings[a.id]?.review_count || 0)).slice(0, 4);
+  if (!hero) return `<div class="empty"><h2>Le catalogue est vide</h2><p class="muted">Ajoutez votre premier logiciel depuis l'espace administrateur.</p><button class="btn primary" data-go="admin">Ouvrir l'administration</button></div>`;
+  return `
+  <section class="hero">
+    <div class="hero-copy">
+      <span class="eyebrow">${discount(hero) ? `Offre du moment · −${discount(hero)} %` : "À la une"}</span>
+      <h1>${esc(hero.name)} ${esc(hero.version ? "v" + hero.version : "")}</h1>
+      <p>${esc(hero.tagline)}</p>
+      ${ratingLine(hero)}
+      <div class="hero-buy">${priceHtml(hero)}
+        <button class="btn primary big" data-add="${hero.id}">Ajouter au panier</button>
+        <button class="btn ghost" data-go="p-${esc(hero.slug)}">Voir la fiche</button></div>
+    </div>
+    ${cover(hero)}
+  </section>
+
+  <section class="promises" aria-label="Nos engagements">
+    <div class="promise">${ICONS.lock}<div><b>Paiement sécurisé</b><span>Carte bancaire via Stripe</span></div></div>
+    <div class="promise">${ICONS.key}<div><b>Licence immédiate</b><span>Clé visible dès le paiement validé</span></div></div>
+    <div class="promise">${ICONS.down}<div><b>Téléchargement direct</b><span>Depuis votre espace client</span></div></div>
+    <div class="promise">${ICONS.help}<div><b>Support inclus</b><span>Aide à l'installation</span></div></div>
+  </section>
+
+  ${promos.length ? `<section><div class="section-head"><h2>Promotions</h2><button class="link" data-go="catalogue">Tout le catalogue →</button></div>
+    <div class="grid">${promos.slice(0, 4).map(card).join("")}</div></section>` : ""}
+
+  <section><div class="section-head"><h2>Les plus appréciés</h2></div><div class="grid">${best.map(card).join("")}</div></section>
+
+  <section><div class="section-head"><h2>Rayons</h2></div>
+    <div class="rayon-tiles">${S.categories.map((c) => {
+      const n = all.filter((p) => p.category_id === c.id).length;
+      return `<button class="rayon-tile" data-go="c-${esc(c.slug)}"><span class="ico" aria-hidden="true">${esc(c.icon || "")}</span><b>${esc(c.name)}</b><span>${n} logiciel${n > 1 ? "s" : ""}</span></button>`;
+    }).join("")}</div></section>
+
+  <section><div class="section-head"><h2>Nouveautés</h2></div><div class="grid">${all.slice(0, 8).map(card).join("")}</div></section>`;
+}
+
+function filtered() {
+  const f = S.filters, q = S.search.trim().toLowerCase();
+  let list = visible().filter((p) =>
+    (!f.cats.length || f.cats.includes(p.category_id)) &&
+    (!f.plats.length || f.plats.some((x) => (p.platforms || []).includes(x))) &&
+    (!f.billing || (f.billing === "one_time" ? p.billing === "one_time" : p.billing !== "one_time")) &&
+    (!q || [p.name, p.tagline, p.description, ...(p.features || [])].join(" ").toLowerCase().includes(q)));
+  const sorters = {
+    pop: (a, b) => (S.ratings[b.id]?.review_count || 0) - (S.ratings[a.id]?.review_count || 0),
+    asc: (a, b) => a.price_cents - b.price_cents,
+    desc: (a, b) => b.price_cents - a.price_cents,
+    note: (a, b) => (S.ratings[b.id]?.avg_rating || 0) - (S.ratings[a.id]?.avg_rating || 0),
+    new: (a, b) => String(b.created_at || "").localeCompare(String(a.created_at || "")),
+  };
+  return list.sort(sorters[f.sort] || sorters.pop);
+}
+function viewCatalog(c) {
+  const list = filtered(), f = S.filters;
+  const title = c ? c.name : S.search ? `Résultats pour « ${esc(S.search)} »` : "Tout le catalogue";
+  return `<div class="crumbs"><button data-go="">Accueil</button><span>›</span><span>${c ? esc(c.name) : "Catalogue"}</span></div>
+  <div class="catalog">
+    <aside class="filters" aria-label="Filtres">
+      <fieldset><legend>Rayon</legend>${S.categories.map((x) => `<label><input type="checkbox" data-fcat="${x.id}" ${f.cats.includes(x.id) ? "checked" : ""}> ${esc(x.name)}</label>`).join("")}</fieldset>
+      <fieldset><legend>Plateforme</legend>${PLATFORMS.map((x) => `<label><input type="checkbox" data-fplat="${x}" ${f.plats.includes(x) ? "checked" : ""}> ${x}</label>`).join("")}</fieldset>
+      <fieldset><legend>Type de licence</legend>
+        <label><input type="radio" name="fbill" value="" ${!f.billing ? "checked" : ""}> Toutes</label>
+        <label><input type="radio" name="fbill" value="one_time" ${f.billing === "one_time" ? "checked" : ""}> Licence à vie</label>
+        <label><input type="radio" name="fbill" value="sub" ${f.billing === "sub" ? "checked" : ""}> Abonnement</label></fieldset>
+      <button class="link" data-reset-filters>Effacer les filtres</button>
+    </aside>
+    <section style="min-width:0">
+      <div class="toolbar"><div><h1 style="font-size:1.6rem">${title}</h1><span class="muted num">${list.length} logiciel${list.length > 1 ? "s" : ""}</span></div>
+        <select id="sort" aria-label="Trier">
+          ${[["pop", "Les plus populaires"], ["note", "Mieux notés"], ["asc", "Prix croissant"], ["desc", "Prix décroissant"], ["new", "Nouveautés"]].map(([v, l]) => `<option value="${v}" ${f.sort === v ? "selected" : ""}>${l}</option>`).join("")}
+        </select></div>
+      ${list.length ? `<div class="grid">${list.map(card).join("")}</div>` : `<div class="empty panel"><h3>Aucun logiciel ne correspond</h3><p class="muted">Essayez un autre mot-clé ou retirez un filtre.</p><button class="btn" data-reset-filters>Effacer les filtres</button></div>`}
+    </section>
+  </div>`;
+}
+
+function viewProduct(slug) {
+  const p = S.products.find((x) => x.slug === slug && (x.is_published || isAdmin()));
+  if (!p) return `<div class="empty"><h2>Logiciel introuvable</h2><button class="btn" data-go="catalogue">Retour au catalogue</button></div>`;
+  const c = cat(p.category_id), d = discount(p);
+  const desc = esc(p.description || "").split(/\n{2,}/).map((x) => `<p>${x.replace(/\n/g, "<br>")}</p>`).join("");
+  return `<div class="crumbs"><button data-go="">Accueil</button><span>›</span>${c ? `<button data-go="c-${esc(c.slug)}">${esc(c.name)}</button><span>›</span>` : ""}<span>${esc(p.name)}</span></div>
+  <div class="pdp">
+    <div>${cover(p)}</div>
+    <div class="pdp-info">
+      <div class="pills">${d ? `<span class="pill promo">−${d} %</span>` : ""}<span class="pill accent">${BILLING_LABEL[p.billing]}</span>${p.is_published ? "" : `<span class="pill bad">Non publié</span>`}</div>
+      <h1>${esc(p.name)}</h1>
+      <p class="muted">${esc(p.tagline)}</p>
+      ${ratingLine(p)}
+      <dl class="spec">
+        <dt>Version</dt><dd class="mono">${esc(p.version || "—")}</dd>
+        <dt>Plateformes</dt><dd>${esc((p.platforms || []).join(", ") || "—")}</dd>
+        <dt>Licence</dt><dd>1 poste par licence</dd>
+        <dt>Livraison</dt><dd>Clé et téléchargement immédiats</dd>
+      </dl>
+      ${(p.features || []).length ? `<ul class="checks">${p.features.slice(0, 4).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+    </div>
+    <aside class="buybox">
+      ${priceHtml(p)}
+      ${p.billing !== "one_time" ? `<p class="muted" style="font-size:13px">Résiliable à tout moment. La licence reste active jusqu'à la fin de la période payée.</p>` : `<p class="muted" style="font-size:13px">Paiement unique, mises à jour mineures incluses.</p>`}
+      <button class="btn primary big" data-add="${p.id}">Ajouter au panier</button>
+      <button class="btn big" data-buy="${p.id}">Acheter maintenant</button>
+      <p class="muted" style="font-size:13px;display:flex;gap:8px;align-items:center"><span style="width:16px;display:inline-flex">${ICONS.lock}</span>Paiement sécurisé par Stripe</p>
+    </aside>
+  </div>
+  <section>
+    <div class="tabs" role="tablist">
+      ${[["desc", "Description"], ["feat", "Fonctionnalités"], ["req", "Configuration requise"], ["rev", `Avis${S.ratings[p.id] ? ` (${S.ratings[p.id].review_count})` : ""}`]]
+        .map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join("")}
+    </div>
+    <div class="tab-panel" id="tab-panel">
+      ${S.tab === "desc" ? desc || `<p class="muted">Pas encore de description.</p>` : ""}
+      ${S.tab === "feat" ? `<ul class="checks">${(p.features || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${S.tab === "req" ? `<p>${esc(p.requirements || "Non précisée.")}</p>` : ""}
+      ${S.tab === "rev" ? `<div id="reviews" data-pid="${p.id}"><p class="muted">Chargement des avis…</p></div>` : ""}
+    </div>
+  </section>
+  ${(() => { const rel = visible().filter((x) => x.category_id === p.category_id && x.id !== p.id).slice(0, 4);
+    return rel.length ? `<section><div class="section-head"><h2>Dans le même rayon</h2></div><div class="grid">${rel.map(card).join("")}</div></section>` : ""; })()}`;
+}
+
+function viewCart() {
+  const lines = cartLines();
+  if (!lines.length) return `<div class="empty panel"><h2>Votre panier est vide</h2><p class="muted">Parcourez le catalogue pour trouver votre prochain logiciel.</p><button class="btn primary" data-go="catalogue">Voir le catalogue</button></div>`;
+  const sub = lines[0].p.billing !== "one_time";
+  return `<h1>Panier</h1>
+  <div class="two-col">
+    <section class="panel" style="gap:0">
+      ${lines.map((l) => `<div class="line">
+        <div data-go="p-${esc(l.p.slug)}" style="cursor:pointer">${cover(l.p)}</div>
+        <div style="min-width:0;display:grid;gap:4px"><h3>${esc(l.p.name)}</h3><span class="muted" style="font-size:13px">${BILLING_LABEL[l.p.billing]} · v${esc(l.p.version || "1.0")}</span>
+          <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+            ${l.p.billing === "one_time" ? `<span class="qty"><button data-qty="${l.id}" data-d="-1" aria-label="Retirer une licence">−</button><span class="num">${l.qty}</span><button data-qty="${l.id}" data-d="1" aria-label="Ajouter une licence">+</button></span><span class="muted" style="font-size:13px">licence${l.qty > 1 ? "s" : ""} (1 par poste)</span>` : ""}
+            <button class="link" data-remove="${l.id}" style="font-size:13px">Retirer</button></div></div>
+        <div class="end price">${money(l.p.price_cents * l.qty)}<span class="per">${PER[l.p.billing]}</span></div>
+      </div>`).join("")}
+    </section>
+    <aside class="panel">
+      <h2>Récapitulatif</h2>
+      <div class="totals num">
+        <div><span>Sous-total</span><span>${money(cartTotal())}</span></div>
+        <div class="muted"><span>Codes promo</span><span>sur la page de paiement</span></div>
+        <div class="grand"><span>Total</span><span>${money(cartTotal())}${PER[lines[0].p.billing]}</span></div>
+      </div>
+      <button class="btn primary big" data-checkout>${S.user ? "Payer en toute sécurité" : "Se connecter et payer"}</button>
+      <p class="muted" style="font-size:13px">${sub ? "Abonnement renouvelé automatiquement, résiliable à tout moment." : "Vos clés de licence apparaissent dans « Mes licences » dès le paiement validé."}</p>
+    </aside>
+  </div>`;
+}
+
+function viewThanks() {
+  S.cart = []; saveCart();
+  return `<div class="empty panel">
+    <span class="pill ok">Paiement reçu</span>
+    <h1>Merci pour votre achat</h1>
+    <p class="muted" style="max-width:52ch">Vos clés de licence et vos liens de téléchargement sont dans votre espace client. Un reçu Stripe vous a été envoyé par e-mail.</p>
+    <div id="thanks-status" class="muted" style="font-size:14px"></div>
+    <button class="btn primary big" data-go="licences">Voir mes licences</button>
+  </div>`;
+}
+
+function viewAccount(tab) {
+  if (!S.user) return viewAuth();
+  if (tab === "admin" && !isAdmin()) tab = "licences";
+  if (tab === "compte") tab = "licences";
+  const nav = [["licences", "Mes licences"], ["commandes", "Mes commandes"], ...(isAdmin() ? [["admin", "Administration"]] : [])];
+  return `<div class="acct">
+    <aside class="panel" style="gap:10px">
+      <div><b>${esc(S.profile?.full_name || S.user.email)}</b><div class="muted" style="font-size:13px;overflow-wrap:anywhere">${esc(S.user.email)}</div></div>
+      <nav class="side-nav">${nav.map(([k, l]) => `<button data-go="${k}" aria-current="${tab === k}">${l}</button>`).join("")}</nav>
+      <button class="btn small ghost" data-logout>Se déconnecter</button>
+    </aside>
+    <section id="acct-body" data-tab="${tab}" style="min-width:0;display:grid;gap:16px"><p class="muted">Chargement…</p></section>
+  </div>`;
+}
+
+function viewAuth() {
+  const m = S.recovery ? "reset" : S.authMode;
+  const titles = { login: "Connexion", signup: "Créer un compte", forgot: "Mot de passe oublié", reset: "Nouveau mot de passe" };
+  return `<div style="max-width:440px;margin:0 auto;width:100%">
+    <form class="panel form" id="auth-form" data-mode="${m}">
+      <h1 style="font-size:1.6rem">${titles[m]}</h1>
+      ${DEMO ? `<div class="notice">Démonstration : saisissez n'importe quelle adresse pour voir l'espace client et l'administration.</div>` : ""}
+      ${m === "signup" ? `<div class="field"><label for="a-name">Nom complet</label><input id="a-name" type="text" autocomplete="name" required></div>` : ""}
+      ${m !== "reset" ? `<div class="field"><label for="a-email">Adresse e-mail</label><input id="a-email" type="email" autocomplete="email" required></div>` : ""}
+      ${m !== "forgot" ? `<div class="field"><label for="a-pass">Mot de passe</label><input id="a-pass" type="password" minlength="8" autocomplete="${m === "login" ? "current-password" : "new-password"}" ${DEMO ? "" : "required"}><small>${m === "login" ? "" : "8 caractères minimum"}</small></div>` : ""}
+      <div id="auth-msg"></div>
+      <button class="btn primary big" type="submit">${{ login: "Se connecter", signup: "Créer mon compte", forgot: "Recevoir le lien", reset: "Enregistrer" }[m]}</button>
+      <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px">
+        ${m === "login" ? `<button type="button" class="link" data-auth="signup">Créer un compte</button><button type="button" class="link" data-auth="forgot">Mot de passe oublié ?</button>` : ""}
+        ${m === "signup" || m === "forgot" ? `<button type="button" class="link" data-auth="login">J'ai déjà un compte</button>` : ""}
+      </div>
+    </form></div>`;
+}
+
+/* ---------------- Contenu chargé après affichage ---------------- */
+async function afterRender(r) {
+  if (r.startsWith("p-") && S.tab === "rev") loadReviews();
+  if (r === "merci" && !DEMO) pollLicenses();
+  const body = $("#acct-body"); if (!body) return;
+  const tab = body.dataset.tab;
+  try {
+    if (tab === "licences") body.innerHTML = await viewLicenses();
+    if (tab === "commandes") body.innerHTML = await viewOrders();
+    if (tab === "admin") body.innerHTML = await viewAdmin();
+  } catch (e) { body.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; }
+}
+
+async function loadReviews() {
+  const box = $("#reviews"); if (!box) return;
+  const pid = box.dataset.pid; const list = await api.reviews(pid);
+  let canWrite = false;
+  if (S.user) { const lic = await api.licenses().catch(() => []); canWrite = lic.some((l) => l.product_id === pid && l.status === "active"); }
+  box.innerHTML = `${list.length ? list.map((r) => `<div class="review"><div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">${stars(r.rating)}<b>${esc(r.author_name || "Client")}</b><span class="muted" style="font-size:13px">${new Date(r.created_at).toLocaleDateString("fr-FR")}</span></div><p>${esc(r.comment)}</p></div>`).join("") : `<p class="muted">Aucun avis pour le moment.</p>`}
+  ${canWrite ? `<form class="form panel" id="review-form" style="margin-top:16px"><h3>Donner votre avis</h3>
+    <div class="field"><label for="rv-rating">Note</label><select id="rv-rating">${[5, 4, 3, 2, 1].map((n) => `<option value="${n}">${"★".repeat(n)} (${n}/5)</option>`).join("")}</select></div>
+    <div class="field"><label for="rv-comment">Commentaire</label><textarea id="rv-comment" maxlength="1000" required></textarea></div>
+    <button class="btn primary" type="submit">Publier l'avis</button></form>` : S.user ? "" : `<p class="muted" style="margin-top:12px;font-size:14px">Seuls les clients ayant acheté ce logiciel peuvent laisser un avis.</p>`}`;
+}
+
+async function pollLicenses() {
+  const st = $("#thanks-status"); if (!st || !S.user) return;
+  st.textContent = "Création de vos licences…";
+  for (let i = 0; i < 10; i++) {
+    const lic = await api.licenses().catch(() => []);
+    const fresh = lic.filter((l) => Date.now() - new Date(l.created_at) < 15 * 60 * 1000);
+    if (fresh.length) { st.textContent = `${fresh.length} licence${fresh.length > 1 ? "s" : ""} prête${fresh.length > 1 ? "s" : ""}.`; return; }
+    await new Promise((r) => setTimeout(r, 2000));
+  }
+  st.textContent = "Le paiement est en cours de confirmation. Vos licences apparaîtront dans quelques instants.";
+}
+
+async function viewLicenses() {
+  const list = await api.licenses();
+  if (!list.length) return `<h1 style="font-size:1.6rem">Mes licences</h1><div class="empty panel"><h3>Aucune licence pour l'instant</h3><p class="muted">Après un achat, vos clés apparaissent ici avec le lien de téléchargement.</p><button class="btn primary" data-go="catalogue">Voir le catalogue</button></div>`;
+  return `<h1 style="font-size:1.6rem">Mes licences</h1>${list.map((l) => `<article class="license">
+    <div class="license-head"><div><h3>${esc(l.products?.name || "Logiciel")}</h3><span class="muted" style="font-size:13px">v${esc(l.products?.version || "—")} · ${esc((l.products?.platforms || []).join(", "))} · achetée le ${new Date(l.created_at).toLocaleDateString("fr-FR")}</span></div>
+      <span class="pill ${l.status === "active" ? "ok" : "bad"}">${l.status === "active" ? "Active" : "Révoquée"}</span></div>
+    <div class="key"><code>${esc(l.license_key)}</code><button class="btn small" data-copy="${esc(l.license_key)}">Copier</button></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+      <span class="muted num" style="font-size:13px">Postes activés : ${l.activations} / ${l.max_activations}</span>
+      ${l.status === "active" ? `<button class="btn primary small" data-download="${l.product_id}">${ICONS.down.replace("<svg", '<svg width="16" height="16"')} Télécharger</button>` : ""}
+    </div></article>`).join("")}`;
+}
+
+async function viewOrders() {
+  const list = await api.orders();
+  const st = { paid: ["ok", "Payée"], refunded: ["bad", "Remboursée"], failed: ["bad", "Échouée"], pending: ["", "En attente"] };
+  return `<h1 style="font-size:1.6rem">Mes commandes</h1>${list.length ? `<div class="panel table-wrap"><table>
+    <thead><tr><th>Date</th><th>Articles</th><th>Statut</th><th class="num">Total</th></tr></thead>
+    <tbody>${list.map((o) => `<tr><td class="num">${new Date(o.created_at).toLocaleDateString("fr-FR")}</td>
+      <td style="white-space:normal">${(o.order_items || []).map((i) => `${esc(i.product_name)}${i.quantity > 1 ? ` ×${i.quantity}` : ""}`).join(", ")}</td>
+      <td><span class="pill ${st[o.status][0]}">${st[o.status][1]}</span></td><td class="num">${money(o.total_cents)}</td></tr>`).join("")}</tbody></table></div>`
+    : `<div class="empty panel"><p class="muted">Aucune commande.</p></div>`}`;
+}
+
+/* ---------------- Administration ---------------- */
+async function adminStats() {
+  if (DEMO) { const paid = S.demoOrders; return { revenue: paid.reduce((s, o) => s + o.total_cents, 0), orders: paid.length, licenses: S.demoLicenses.length, recent: paid.slice(0, 10) }; }
+  const [o, l] = await Promise.all([
+    sb.from("orders").select("id, email, status, total_cents, created_at, order_items(product_name, quantity)").eq("status", "paid").order("created_at", { ascending: false }).limit(200),
+    sb.from("licenses").select("id", { count: "exact", head: true }),
+  ]);
+  const paid = o.data || [];
+  return { revenue: paid.reduce((s, x) => s + x.total_cents, 0), orders: paid.length, licenses: l.count || 0, recent: paid.slice(0, 10) };
+}
+async function viewAdmin() {
+  const st = await adminStats();
+  const ed = S.editing;
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="font-size:1.6rem">Administration</h1>
+      <button class="btn primary" data-edit="new">Ajouter un logiciel</button></div>
+    <div class="promises" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
+      <div class="promise" style="display:grid"><span>Chiffre d'affaires (200 dernières ventes)</span><b class="num" style="font:700 1.4rem var(--f-display)">${money(st.revenue)}</b></div>
+      <div class="promise" style="display:grid"><span>Commandes payées</span><b class="num" style="font:700 1.4rem var(--f-display)">${st.orders}</b></div>
+      <div class="promise" style="display:grid"><span>Licences émises</span><b class="num" style="font:700 1.4rem var(--f-display)">${st.licenses}</b></div>
+      <div class="promise" style="display:grid"><span>Logiciels en ligne</span><b class="num" style="font:700 1.4rem var(--f-display)">${visible().length} / ${S.products.length}</b></div>
+    </div>
+    ${ed ? productForm(ed === "new" ? null : prod(ed)) : ""}
+    <div class="panel table-wrap" style="gap:0"><h2 style="margin-bottom:10px">Catalogue</h2><table>
+      <thead><tr><th>Logiciel</th><th>Rayon</th><th>Type</th><th class="num">Prix</th><th>État</th><th></th></tr></thead>
+      <tbody>${S.products.map((p) => `<tr><td><b>${esc(p.name)}</b> <span class="muted mono" style="font-size:12px">v${esc(p.version || "")}</span></td>
+        <td>${esc(cat(p.category_id)?.name || "—")}</td><td>${BILLING_LABEL[p.billing]}</td><td class="num">${money(p.price_cents)}</td>
+        <td><span class="pill ${p.is_published ? "ok" : ""}">${p.is_published ? "En ligne" : "Brouillon"}</span>${p.file_path || DEMO ? "" : ` <span class="pill bad">Pas de fichier</span>`}</td>
+        <td><button class="btn small" data-edit="${p.id}">Modifier</button></td></tr>`).join("")}</tbody></table></div>
+    <div class="panel table-wrap" style="gap:0"><h2 style="margin-bottom:10px">Dernières ventes</h2>${st.recent.length ? `<table>
+      <thead><tr><th>Date</th><th>Client</th><th>Articles</th><th class="num">Montant</th></tr></thead>
+      <tbody>${st.recent.map((o) => `<tr><td class="num">${new Date(o.created_at).toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })}</td><td>${esc(o.email || S.user.email)}</td>
+        <td style="white-space:normal">${(o.order_items || []).map((i) => esc(i.product_name)).join(", ")}</td><td class="num">${money(o.total_cents)}</td></tr>`).join("")}</tbody></table>` : `<p class="muted">Aucune vente pour l'instant.</p>`}</div>`;
+}
+
+function productForm(p) {
+  p = p || { name: "", slug: "", tagline: "", description: "", category_id: S.categories[0]?.id, price_cents: 0, compare_at_cents: null, billing: "one_time", version: "1.0", platforms: [], features: [], requirements: "", is_published: true, is_featured: false };
+  const dec = (c) => (c ? (c / 100).toFixed(2) : "");
+  return `<form class="panel form" id="product-form" data-id="${p.id || ""}">
+    <h2>${p.id ? `Modifier ${esc(p.name)}` : "Nouveau logiciel"}</h2>
+    <div class="row2"><div class="field"><label for="pf-name">Nom</label><input id="pf-name" type="text" value="${esc(p.name)}" required></div>
+      <div class="field"><label for="pf-slug">Adresse de la fiche</label><input id="pf-slug" type="text" value="${esc(p.slug)}" pattern="[a-z0-9-]+" placeholder="ex. caisse-pro"><small>Lettres minuscules, chiffres et tirets. Laissez vide pour la générer.</small></div></div>
+    <div class="field"><label for="pf-tagline">Accroche (une phrase)</label><input id="pf-tagline" type="text" maxlength="140" value="${esc(p.tagline)}"></div>
+    <div class="field"><label for="pf-desc">Description</label><textarea id="pf-desc" rows="5">${esc(p.description)}</textarea></div>
+    <div class="row2">
+      <div class="field"><label for="pf-cat">Rayon</label><select id="pf-cat">${S.categories.map((c) => `<option value="${c.id}" ${c.id === p.category_id ? "selected" : ""}>${esc(c.name)}</option>`).join("")}</select></div>
+      <div class="field"><label for="pf-billing">Type de vente</label><select id="pf-billing">${Object.entries(BILLING_LABEL).map(([k, l]) => `<option value="${k}" ${k === p.billing ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+      <div class="field"><label for="pf-price">Prix (${CONFIG.CURRENCY.toUpperCase()})</label><input id="pf-price" type="number" min="0.5" step="0.01" value="${dec(p.price_cents)}" required></div>
+      <div class="field"><label for="pf-compare">Ancien prix barré (facultatif)</label><input id="pf-compare" type="number" min="0" step="0.01" value="${dec(p.compare_at_cents)}"></div>
+      <div class="field"><label for="pf-version">Version</label><input id="pf-version" type="text" value="${esc(p.version)}"></div>
+    </div>
+    <fieldset class="field" style="border:0;padding:0;margin:0"><label>Plateformes</label><div class="pills">${PLATFORMS.map((x) => `<label class="pill" style="cursor:pointer"><input type="checkbox" data-pf-plat="${x}" ${(p.platforms || []).includes(x) ? "checked" : ""}> ${x}</label>`).join("")}</div></fieldset>
+    <div class="field"><label for="pf-features">Fonctionnalités (une par ligne)</label><textarea id="pf-features" rows="4">${esc((p.features || []).join("\n"))}</textarea></div>
+    <div class="field"><label for="pf-req">Configuration requise</label><textarea id="pf-req" rows="2">${esc(p.requirements)}</textarea></div>
+    <div class="row2">
+      <div class="field"><label for="pf-cover">Image de pochette (facultative)</label><input id="pf-cover" type="file" accept="image/*"><small>${p.cover_url ? "Une image est déjà en place." : "Sinon, une pochette est générée automatiquement."}</small></div>
+      <div class="field"><label for="pf-file">Fichier d'installation</label><input id="pf-file" type="file"><small>${p.file_path ? `Actuel : ${esc(p.file_path.split("/").pop())}` : "Téléchargeable uniquement par les clients ayant une licence. 50 Mo max. sur l'offre gratuite de Supabase."}</small></div>
+    </div>
+    <div style="display:flex;gap:18px;flex-wrap:wrap">
+      <label style="display:flex;gap:8px;align-items:center"><input id="pf-pub" type="checkbox" ${p.is_published ? "checked" : ""}> En ligne</label>
+      <label style="display:flex;gap:8px;align-items:center"><input id="pf-feat" type="checkbox" ${p.is_featured ? "checked" : ""}> À la une sur l'accueil</label></div>
+    <div id="pf-msg"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn primary" type="submit">Enregistrer</button><button class="btn ghost" type="button" data-edit="">Annuler</button></div>
+  </form>`;
+}
+
+const slugify = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+async function saveProduct(form) {
+  const id = form.dataset.id, msg = $("#pf-msg"), btn = form.querySelector("[type=submit]");
+  const name = $("#pf-name").value.trim();
+  const toCents = (v) => (v === "" ? null : Math.round(parseFloat(v) * 100));
+  const row = {
+    name, slug: $("#pf-slug").value.trim() || slugify(name), tagline: $("#pf-tagline").value.trim(), description: $("#pf-desc").value.trim(),
+    category_id: +$("#pf-cat").value, billing: $("#pf-billing").value, price_cents: toCents($("#pf-price").value), compare_at_cents: toCents($("#pf-compare").value),
+    version: $("#pf-version").value.trim(), platforms: [...form.querySelectorAll("[data-pf-plat]:checked")].map((x) => x.dataset.pfPlat),
+    features: $("#pf-features").value.split("\n").map((x) => x.trim()).filter(Boolean), requirements: $("#pf-req").value.trim(),
+    is_published: $("#pf-pub").checked, is_featured: $("#pf-feat").checked,
+  };
+  if (DEMO) {
+    if (id) Object.assign(prod(id), row); else S.products.unshift({ id: "n" + Date.now(), created_at: new Date().toISOString(), ...row });
+    S.editing = null; toast("Logiciel enregistré (démonstration)"); render(); return;
+  }
+  btn.disabled = true; msg.innerHTML = `<div class="notice">Enregistrement…</div>`;
+  try {
+    const coverFile = $("#pf-cover").files[0], swFile = $("#pf-file").files[0];
+    if (coverFile) {
+      const path = `covers/${row.slug}-${Date.now()}.${coverFile.name.split(".").pop()}`;
+      const up = await sb.storage.from("media").upload(path, coverFile, { upsert: true }); if (up.error) throw up.error;
+      row.cover_url = sb.storage.from("media").getPublicUrl(path).data.publicUrl;
+    }
+    if (swFile) {
+      msg.innerHTML = `<div class="notice">Envoi du fichier d'installation (${(swFile.size / 1048576).toFixed(1)} Mo)…</div>`;
+      const path = `${row.slug}/${row.version || "1.0"}/${swFile.name.replace(/[^\w.\-]+/g, "_")}`;
+      const up = await sb.storage.from("software").upload(path, swFile, { upsert: true }); if (up.error) throw up.error;
+      row.file_path = path;
+    }
+    row.updated_at = new Date().toISOString();
+    const q = id ? sb.from("products").update(row).eq("id", id) : sb.from("products").insert(row);
+    const { error } = await q; if (error) throw error;
+    await api.catalog(); S.editing = null; toast("Logiciel enregistré"); render();
+  } catch (e) { msg.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; btn.disabled = false; }
+}
+
+/* ---------------- Connexion ---------------- */
+async function submitAuth(form) {
+  const m = form.dataset.mode, msg = $("#auth-msg");
+  const email = $("#a-email")?.value.trim(), pass = $("#a-pass")?.value;
+  const show = (t, k = "bad") => (msg.innerHTML = `<div class="notice ${k}">${esc(t)}</div>`);
+  if (DEMO) { S.user = { email: email || "client@exemple.com" }; S.profile = { full_name: $("#a-name")?.value || "" }; afterLogin(); return; }
+  try {
+    if (m === "login") { const { error } = await sb.auth.signInWithPassword({ email, password: pass }); if (error) throw error; }
+    if (m === "signup") {
+      const { data, error } = await sb.auth.signUp({ email, password: pass, options: { data: { full_name: $("#a-name").value }, emailRedirectTo: location.origin + location.pathname } });
+      if (error) throw error;
+      if (!data.session) return show("Compte créé. Ouvrez le lien de confirmation reçu par e-mail, puis connectez-vous.", "ok");
+    }
+    if (m === "forgot") { const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + location.pathname }); if (error) throw error; return show("Si ce compte existe, un lien de réinitialisation vient d'être envoyé.", "ok"); }
+    if (m === "reset") { const { error } = await sb.auth.updateUser({ password: pass }); if (error) throw error; S.recovery = false; toast("Mot de passe modifié"); }
+  } catch (e) {
+    const t = { "Invalid login credentials": "E-mail ou mot de passe incorrect.", "Email not confirmed": "Confirmez d'abord votre adresse avec le lien reçu par e-mail.", "User already registered": "Un compte existe déjà avec cette adresse." }[e.message];
+    show(t || e.message);
+  }
+}
+async function loadProfile() {
+  if (DEMO || !S.user) return;
+  const { data } = await sb.from("profiles").select("*").eq("id", S.user.id).maybeSingle();
+  S.profile = data;
+  if (data && !data.full_name && S.user.user_metadata?.full_name) {
+    await sb.from("profiles").update({ full_name: S.user.user_metadata.full_name }).eq("id", S.user.id);
+    S.profile.full_name = S.user.user_metadata.full_name;
+  }
+}
+function afterLogin() {
+  $("#account-lbl").textContent = "Mon espace";
+  const r = route();
+  if (cartLines().length && (r === "compte" || r === "panier")) go("panier"); else if (r === "compte" || /access_token/.test(location.hash)) go("licences"); else render();
+}
+
+/* ---------------- Événements ---------------- */
+document.addEventListener("click", async (e) => {
+  const t = e.target.closest("[data-go],[data-add],[data-buy],[data-qty],[data-remove],[data-checkout],[data-tab],[data-copy],[data-download],[data-logout],[data-auth],[data-edit],[data-reset-filters]");
+  if (!t) return;
+  const d = t.dataset;
+  if ("add" in d) { e.stopPropagation(); addToCart(d.add); return; }
+  if ("buy" in d) { addToCart(d.buy); go("panier"); return; }
+  if ("qty" in d) { const l = S.cart.find((x) => x.id === d.qty); l.qty = Math.max(1, Math.min(50, l.qty + +d.d)); saveCart(); render(); return; }
+  if ("remove" in d) { S.cart = S.cart.filter((x) => x.id !== d.remove); saveCart(); render(); return; }
+  if ("checkout" in d) { checkout(t); return; }
+  if ("tab" in d) { S.tab = d.tab; render(); return; }
+  if ("copy" in d) { try { await navigator.clipboard.writeText(d.copy); toast("Clé copiée"); } catch { const c = t.previousElementSibling; getSelection().selectAllChildren(c); toast("Clé sélectionnée : copiez-la avec Ctrl+C"); } return; }
+  if ("download" in d) {
+    if (DEMO) { toast("En boutique réelle, le téléchargement démarre ici."); return; }
+    t.disabled = true;
+    try { const { url } = await api.invoke("download", { product_id: d.download }); location.href = url; } catch (err) { toast(err.message); }
+    t.disabled = false; return;
+  }
+  if ("logout" in d) { if (!DEMO) await sb.auth.signOut(); S.user = null; S.profile = null; $("#account-lbl").textContent = "Mon compte"; go(""); return; }
+  if ("auth" in d) { S.authMode = d.auth; render(); return; }
+  if ("edit" in d) { S.editing = d.edit || null; render(); if (S.editing) setTimeout(() => $("#product-form")?.scrollIntoView({ behavior: "smooth" }), 50); return; }
+  if ("resetFilters" in d) { S.filters = { cats: [], plats: [], billing: "", sort: S.filters.sort }; S.search = ""; $("#search-input").value = ""; go("catalogue"); return; }
+  if ("go" in d) { if (d.go.startsWith("p-")) S.tab = "desc"; go(d.go); }
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches("article.card")) e.target.click(); });
+document.addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.dataset.fcat) { const id = +t.dataset.fcat; S.filters.cats = t.checked ? [...S.filters.cats, id] : S.filters.cats.filter((x) => x !== id); go("catalogue"); }
+  else if (t.dataset.fplat) { const x = t.dataset.fplat; S.filters.plats = t.checked ? [...S.filters.plats, x] : S.filters.plats.filter((y) => y !== x); render(); }
+  else if (t.name === "fbill") { S.filters.billing = t.value; render(); }
+  else if (t.id === "sort") { S.filters.sort = t.value; render(); }
+});
+document.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  if (f.id === "search-form") { S.search = $("#search-input").value; S.filters.cats = []; go("recherche"); }
+  if (f.id === "auth-form") submitAuth(f);
+  if (f.id === "product-form") saveProduct(f);
+  if (f.id === "review-form") {
+    const pid = $("#reviews").dataset.pid;
+    const row = { product_id: pid, rating: +$("#rv-rating").value, comment: $("#rv-comment").value.trim(), author_name: S.profile?.full_name || S.user.email.split("@")[0] };
+    if (DEMO) { (DEMO_DATA.reviews[pid] ||= []).unshift({ ...row, created_at: new Date().toISOString() }); loadReviews(); return; }
+    const { error } = await sb.from("reviews").insert({ ...row, user_id: S.user.id });
+    if (error) toast(error.code === "23505" ? "Vous avez déjà donné votre avis sur ce logiciel." : error.message); else { toast("Merci pour votre avis"); await api.catalog(); loadReviews(); }
+  }
+});
+window.addEventListener("hashchange", render);
+
+/* ---------------- Démarrage ---------------- */
+(async function start() {
+  document.title = CONFIG.SHOP_NAME;
+  $("#logo-name").textContent = $("#foot-name").textContent = CONFIG.SHOP_NAME;
+  $("#logo-mark").textContent = initials(CONFIG.SHOP_NAME) || "LG";
+  if (CONFIG.SUPPORT_EMAIL) $("#foot-support").textContent = "Support : " + CONFIG.SUPPORT_EMAIL;
+  $("#demo-bar").hidden = !DEMO;
+  saveCart();
+  try { await api.catalog(); }
+  catch (e) { $("#view").innerHTML = `<div class="notice bad">Impossible de charger le catalogue : ${esc(e.message)}. Vérifiez SUPABASE_URL et SUPABASE_ANON_KEY.</div>`; return; }
+  $("#rayons").innerHTML = `<button data-go="catalogue">Tout le catalogue</button>` + S.categories.map((c) => `<button data-go="c-${esc(c.slug)}">${esc(c.name)}</button>`).join("");
+  if (sb) {
+    const { data } = await sb.auth.getSession();
+    S.user = data.session?.user || null;
+    if (S.user) { await loadProfile(); $("#account-lbl").textContent = "Mon espace"; }
+    sb.auth.onAuthStateChange(async (ev, session) => {
+      if (ev === "PASSWORD_RECOVERY") { S.recovery = true; S.user = null; go("compte"); return; }
+      if (ev === "SIGNED_IN" && (!S.user || S.user.id !== session.user.id)) { S.user = session.user; await loadProfile(); afterLogin(); }
+      if (ev === "SIGNED_OUT") { S.user = null; S.profile = null; }
+    });
+  }
+  render();
+})();
+</script>
+
+</body>
+</html>
