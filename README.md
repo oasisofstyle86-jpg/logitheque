@@ -67,7 +67,15 @@ Pour **chacune** des fonctions ci-dessous :
 | `stripe-webhook`   | **Non**          |
 | `license-verify`   | **Non**          |
 
-## Partie 4 — Stripe
+## Partie 4 — Stripe (méthode simple)
+
+1. dashboard.stripe.com/test/apikeys → **Reveal test key** → copiez la clé `sk_test_...`
+2. Supabase → **Edge Functions → Secrets** → `STRIPE_SECRET_KEY` = cette clé → **Save**
+3. Sur la boutique → **Mon espace → Administration → Relier Stripe**.
+   Le bouton crée lui-même le webhook dans Stripe et enregistre son secret :
+   les étapes « Webhooks » ci-dessous deviennent inutiles.
+
+## Partie 4 bis — Stripe (méthode manuelle, facultative)
 
 1. dashboard.stripe.com → **Settings → Business → Account details** :
    industrie *Software*, description « Vente de logiciels développés par nous, livrés par

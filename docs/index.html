@@ -719,7 +719,7 @@ async function afterRender(r) {
   try {
     if (tab === "licences") body.innerHTML = await viewLicenses();
     if (tab === "commandes") body.innerHTML = await viewOrders();
-    if (tab === "admin") body.innerHTML = await viewAdmin();
+    if (tab === "admin") { body.innerHTML = await viewAdmin(); loadStripePanel(); }
   } catch (e) { body.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; }
 }
 
@@ -786,6 +786,7 @@ async function viewAdmin() {
   const ed = S.editing;
   return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="font-size:1.6rem">Administration</h1>
       <button class="btn primary" data-edit="new">Ajouter un logiciel</button></div>
+    <section class="panel" id="stripe-panel" aria-live="polite"><h2>Paiements Stripe</h2><p class="muted">Vérification du lien avec Stripe…</p></section>
     <div class="promises" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
       <div class="promise" style="display:grid"><span>Chiffre d'affaires (200 dernières ventes)</span><b class="num" style="font:700 1.4rem var(--f-display)">${money(st.revenue)}</b></div>
       <div class="promise" style="display:grid"><span>Commandes payées</span><b class="num" style="font:700 1.4rem var(--f-display)">${st.orders}</b></div>
@@ -873,6 +874,33 @@ async function saveProduct(form) {
   } catch (e) { msg.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; btn.disabled = false; }
 }
 
+/* ---------------- Lien avec Stripe ---------------- */
+async function loadStripePanel(connect = false) {
+  const box = $("#stripe-panel"); if (!box) return;
+  const head = `<h2>Paiements Stripe</h2>`;
+  if (DEMO) { box.innerHTML = head + `<p class="muted">Disponible quand la boutique est reliée à Supabase.</p>`; return; }
+  if (connect) box.innerHTML = head + `<p class="muted">Liaison avec Stripe en cours…</p>`;
+  try {
+    const r = await api.invoke("stripe-setup", { action: connect ? "connect" : "status" });
+    if (r.connected) {
+      const live = r.mode === "live";
+      box.innerHTML = head + `
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <span class="pill ok">Relié</span><span class="pill ${live ? "promo" : "accent"}">${live ? "Mode réel : vrais paiements" : "Mode test : aucun vrai paiement"}</span></div>
+        <p>Compte Stripe : <b>${esc(r.account?.name || "")}</b>${r.account?.email ? ` <span class="muted">(${esc(r.account.email)})</span>` : ""}</p>
+        ${live && r.account && !r.account.charges_enabled ? `<div class="notice bad">Stripe n'a pas encore activé les paiements sur ce compte. Terminez la vérification de votre compte dans Stripe.</div>` : ""}
+        ${live ? "" : `<p class="muted" style="font-size:14px">Faites un achat test avec la carte 4242 4242 4242 4242, une date future et le code 123.</p>`}`;
+    } else if (r.step === "key") {
+      box.innerHTML = head + `<div class="notice bad">${esc(r.error)}</div>`;
+    } else {
+      box.innerHTML = head + `
+        <p>Compte Stripe trouvé : <b>${esc(r.account?.name || "")}</b> <span class="pill ${r.mode === "live" ? "promo" : "accent"}">${r.mode === "live" ? "mode réel" : "mode test"}</span></p>
+        <p class="muted" style="font-size:14px">Un clic suffit pour que Stripe prévienne la boutique à chaque paiement et que les licences soient créées automatiquement.</p>
+        <div><button class="btn primary" data-stripe-connect>Relier Stripe</button></div>`;
+    }
+  } catch (e) { box.innerHTML = head + `<div class="notice bad">${esc(e.message)}</div>`; }
+}
+
 /* ---------------- Connexion ---------------- */
 async function submitAuth(form) {
   const m = form.dataset.mode, msg = $("#auth-msg");
@@ -910,7 +938,7 @@ function afterLogin() {
 
 /* ---------------- Événements ---------------- */
 document.addEventListener("click", async (e) => {
-  const t = e.target.closest("[data-go],[data-add],[data-buy],[data-qty],[data-remove],[data-checkout],[data-tab],[data-copy],[data-download],[data-logout],[data-auth],[data-edit],[data-reset-filters]");
+  const t = e.target.closest("[data-go],[data-add],[data-buy],[data-qty],[data-remove],[data-checkout],[data-tab],[data-copy],[data-download],[data-logout],[data-auth],[data-edit],[data-reset-filters],[data-stripe-connect]");
   if (!t) return;
   const d = t.dataset;
   if ("add" in d) { e.stopPropagation(); addToCart(d.add); return; }
@@ -929,6 +957,7 @@ document.addEventListener("click", async (e) => {
   if ("logout" in d) { if (!DEMO) await sb.auth.signOut(); S.user = null; S.profile = null; $("#account-lbl").textContent = "Mon compte"; go(""); return; }
   if ("auth" in d) { S.authMode = d.auth; render(); return; }
   if ("edit" in d) { S.editing = d.edit || null; render(); if (S.editing) setTimeout(() => $("#product-form")?.scrollIntoView({ behavior: "smooth" }), 50); return; }
+  if ("stripeConnect" in d) { loadStripePanel(true); return; }
   if ("resetFilters" in d) { S.filters = { cats: [], plats: [], billing: "", sort: S.filters.sort }; S.search = ""; $("#search-input").value = ""; go("catalogue"); return; }
   if ("go" in d) { if (d.go.startsWith("p-")) S.tab = "desc"; go(d.go); }
 });

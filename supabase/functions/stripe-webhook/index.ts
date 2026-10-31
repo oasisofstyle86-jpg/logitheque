@@ -54,25 +54,38 @@ export function newLicenseKey(): string {
 
 // ---- code de la fonction ----
 
-const stripe = stripeClient();
+// La vérification de signature n'utilise pas la clé API : une valeur vide suffit ici.
+const stripe = new Stripe(Deno.env.get("STRIPE_SECRET_KEY") ?? "sk_non_configuree", {
+  httpClient: Stripe.createFetchHttpClient(),
+});
 const cryptoProvider = Stripe.createSubtleCryptoProvider();
+
+/** Secrets de signature possibles : celui saisi à la main, puis ceux enregistrés par « Relier Stripe ». */
+async function webhookSecrets(): Promise<string[]> {
+  const list: string[] = [];
+  const env = Deno.env.get("STRIPE_WEBHOOK_SECRET");
+  if (env) list.push(env);
+  const { data } = await adminClient().from("app_secrets").select("value").like("name", "stripe_webhook_secret%");
+  for (const row of data ?? []) if (row.value && !list.includes(row.value)) list.push(row.value);
+  return list;
+}
 
 Deno.serve(async (req) => {
   const signature = req.headers.get("Stripe-Signature");
   const body = await req.text();
+  if (!signature) return new Response("Signature manquante", { status: 400 });
 
-  let event: Stripe.Event;
-  try {
-    event = await stripe.webhooks.constructEventAsync(
-      body,
-      signature!,
-      Deno.env.get("STRIPE_WEBHOOK_SECRET")!,
-      undefined,
-      cryptoProvider,
-    );
-  } catch (err) {
-    return new Response(`Signature invalide : ${(err as Error).message}`, { status: 400 });
+  let event: Stripe.Event | null = null;
+  let lastError = "aucun secret de signature configuré";
+  for (const secret of await webhookSecrets()) {
+    try {
+      event = await stripe.webhooks.constructEventAsync(body, signature, secret, undefined, cryptoProvider);
+      break;
+    } catch (err) {
+      lastError = (err as Error).message;
+    }
   }
+  if (!event) return new Response(`Signature invalide : ${lastError}`, { status: 400 });
 
   const db = adminClient();
 
