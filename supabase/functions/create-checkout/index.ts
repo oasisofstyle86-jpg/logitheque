@@ -52,7 +52,7 @@ export function newLicenseKey(): string {
 
 // ---- code de la fonction ----
 
-const CURRENCY = (Deno.env.get("CURRENCY") ?? "usd").toLowerCase();
+const CURRENCY = (Deno.env.get("CURRENCY") ?? "gbp").toLowerCase();
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://oasisofstyle86-jpg.github.io/logitheque";
 
 Deno.serve(async (req) => {

@@ -93,7 +93,7 @@ Pour **chacune** des fonctions ci-dessous :
 | `STRIPE_SECRET_KEY`     | (D)                           |
 | `STRIPE_WEBHOOK_SECRET` | (E)                           |
 | `SITE_URL`              | (A) **sans** le `/` final     |
-| `CURRENCY`              | `usd` (ou `eur`)              |
+| `CURRENCY`              | `gbp`                         |
 
 → **Save**. (`SUPABASE_URL` et `SUPABASE_SERVICE_ROLE_KEY` sont déjà fournis par Supabase.)
 
