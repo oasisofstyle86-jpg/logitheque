@@ -5,7 +5,7 @@ import { createClient, SupabaseClient } from "npm:@supabase/supabase-js@2";
 import Stripe from "npm:stripe@17";
 
 export const corsHeaders = {
-  "Access-Control-Allow-Origin": (() => { try { return new URL(Deno.env.get("SITE_URL")!).origin; } catch { return "*"; } })(),
+  "Access-Control-Allow-Origin": (() => { try { return new URL(Deno.env.get("SITE_URL") ?? "https://oasisofstyle86-jpg.github.io/logitheque").origin; } catch { return "*"; } })(),
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
