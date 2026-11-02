@@ -54,6 +54,7 @@ export function newLicenseKey(): string {
 
 const CURRENCY = (Deno.env.get("CURRENCY") ?? "eur").toLowerCase();
 const SITE_URL = Deno.env.get("SITE_URL") ?? "https://oasisofstyle86-jpg.github.io/logitheque";
+const TERMS_VERSION = "2026-11-02";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -63,10 +64,14 @@ Deno.serve(async (req) => {
   if (!user) return json({ error: "Connectez-vous pour acheter." }, 401);
 
   let items: { product_id: string; quantity?: number }[];
+  let acceptTerms = false;
   try {
-    ({ items } = await req.json());
+    ({ items, accept_terms: acceptTerms } = await req.json());
   } catch {
     return json({ error: "Requête invalide" }, 400);
+  }
+  if (acceptTerms !== true) {
+    return json({ error: "Cochez la case d'acceptation des conditions de vente pour continuer." }, 400);
   }
   if (!Array.isArray(items) || items.length === 0 || items.length > 30) {
     return json({ error: "Panier vide ou trop grand" }, 400);
@@ -99,7 +104,10 @@ Deno.serve(async (req) => {
   // 1) Commande en attente
   const { data: order, error: oErr } = await db
     .from("orders")
-    .insert({ user_id: user.id, email: user.email, total_cents: total, currency: CURRENCY })
+    .insert({
+      user_id: user.id, email: user.email, total_cents: total, currency: CURRENCY,
+      terms_accepted_at: new Date().toISOString(), terms_version: TERMS_VERSION,
+    })
     .select("id")
     .single();
   if (oErr) return json({ error: oErr.message }, 500);
@@ -123,7 +131,15 @@ Deno.serve(async (req) => {
     metadata: { order_id: order.id, user_id: user.id },
     ...(mode === "subscription"
       ? { subscription_data: { metadata: { order_id: order.id, user_id: user.id } } }
-      : { payment_intent_data: { metadata: { order_id: order.id, user_id: user.id } } }),
+      : { payment_intent_data: {
+          description: `Logithèque : ${lines.map((l) => l.product!.name).join(", ")}`,
+          metadata: { order_id: order.id, user_id: user.id },
+        } }),
+    custom_text: {
+      after_submit: {
+        message: "Livraison immédiate : votre clé de licence et vos instructions d'accès apparaissent dans « Mon espace → Mes licences » sur la boutique dès la validation du paiement.",
+      },
+    },
     line_items: lines.map((l) => ({
       quantity: l.quantity,
       price_data: {

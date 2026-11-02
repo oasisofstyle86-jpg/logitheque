@@ -124,7 +124,8 @@ main{padding-block:28px 64px;display:grid;gap:40px}
 .card:hover{border-color:var(--accent);transform:translateY(-2px)}
 .card-body{display:grid;gap:6px;align-content:start;min-width:0}
 .card-body .tag{font-size:13px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.card-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.card-btns{display:flex;gap:6px}
 .price{font:700 1.15rem var(--f-display);font-variant-numeric:tabular-nums}
 .price .per{font:500 12px var(--f-body);color:var(--muted)}
 .was{color:var(--muted);text-decoration:line-through;font-size:13px;margin-left:6px;font-weight:400}
@@ -224,6 +225,50 @@ td.num,th.num{text-align:right}
 footer.foot{background:var(--head);color:var(--head-muted);font-size:13px}
 footer.foot .wrap{padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- Pied de page ---------- */
+footer.foot .foot-grid{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:24px;padding-block:32px 8px}
+footer.foot h4{color:var(--head-ink);font:600 13px var(--f-body);text-transform:uppercase;letter-spacing:.06em;margin:0 0 10px}
+footer.foot nav{display:grid;gap:6px;justify-items:start}
+footer.foot nav button{background:none;border:0;padding:0;color:var(--head-muted);cursor:pointer;font-size:14px;text-align:left}
+footer.foot nav button:hover{color:var(--head-ink);text-decoration:underline}
+footer.foot address{font-style:normal;line-height:1.6}
+footer.foot .foot-bottom{border-top:1px solid #ffffff14;padding-block:14px calc(18px + env(safe-area-inset-bottom,0px))!important}
+@media (max-width:720px){footer.foot .foot-grid{grid-template-columns:1fr}}
+
+/* ---------- Pages de texte (conditions, aide) ---------- */
+.prose{max-width:72ch;display:grid;gap:14px}
+.prose h1{margin-bottom:4px}
+.prose h2{font-size:1.15rem;margin-top:14px}
+.prose p,.prose li{color:var(--ink)}
+.prose ul,.prose ol{margin:0;padding-left:22px;display:grid;gap:6px}
+.prose .updated{color:var(--muted);font-size:13px}
+.legal-nav{display:flex;gap:6px;flex-wrap:wrap}
+.legal-nav button{background:var(--sunk);border:1px solid var(--line);border-radius:999px;padding:6px 12px;font-size:13px;cursor:pointer;color:var(--ink)}
+.legal-nav button[aria-current="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+
+/* ---------- Acceptation des conditions ---------- */
+.terms{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.45;color:var(--muted);cursor:pointer}
+.terms input{margin-top:3px;flex:none;width:16px;height:16px}
+.terms .link{font-size:13px}
+.terms.need{color:var(--bad)}
+
+/* ---------- Livraison dans « Mes licences » ---------- */
+.access{border-top:1px dashed var(--line);padding-top:12px;display:grid;gap:10px}
+.access ol{margin:0;padding-left:20px;display:grid;gap:4px;font-size:14px}
+.access .wait{font-size:14px;color:var(--muted)}
+
+/* ---------- Service client ---------- */
+.faq details{border-bottom:1px solid var(--line);padding-block:12px}
+.faq summary{cursor:pointer;font-weight:600;list-style-position:outside}
+.faq details p{margin-top:8px;color:var(--muted)}
+.ticket{border:1px solid var(--line);border-radius:var(--r);padding:14px;display:grid;gap:8px;background:var(--surface)}
+.ticket-head{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:center}
+.ticket .msg{white-space:pre-wrap;overflow-wrap:anywhere}
+.ticket .reply{background:var(--accent-soft);border-radius:var(--r-sm);padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere}
+.contact-card{display:grid;gap:6px;font-size:14px}
+.contact-card b{font-size:15px}
+.contact-card code{font:500 14px var(--f-mono);user-select:all;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -241,6 +286,10 @@ footer.foot .wrap{padding-block:28px calc(28px + env(safe-area-inset-bottom,0px)
       <button type="submit">Chercher</button>
     </form>
     <div class="top-actions">
+      <button class="icon-btn" data-go="aide">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5V14M12 17.5v.01"/></svg>
+        <span class="lbl">Aide</span>
+      </button>
       <button class="icon-btn" data-go="compte" id="account-btn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
         <span class="lbl" id="account-lbl">Mon compte</span>
@@ -257,10 +306,30 @@ footer.foot .wrap{padding-block:28px calc(28px + env(safe-area-inset-bottom,0px)
 <main class="wrap" id="view" aria-live="polite"></main>
 
 <footer class="foot">
-  <div class="wrap">
-    <span id="foot-name">Logithèque</span>
-    <span>Paiement sécurisé par Stripe · Licence envoyée immédiatement après paiement</span>
-    <span id="foot-support"></span>
+  <div class="wrap foot-grid">
+    <div>
+      <h4 id="foot-name">Logithèque</h4>
+      <p>Logiciels de gestion livrés immédiatement après paiement. Paiement sécurisé par Stripe : nous ne voyons ni ne conservons jamais vos numéros de carte.</p>
+    </div>
+    <div>
+      <h4>Aide</h4>
+      <nav aria-label="Aide">
+        <button data-go="aide">Aide et service client</button>
+        <button data-go="livraison">Livraison des logiciels</button>
+        <button data-go="remboursement">Remboursements</button>
+      </nav>
+    </div>
+    <div>
+      <h4>Informations légales</h4>
+      <nav aria-label="Informations légales">
+        <button data-go="conditions">Conditions générales de vente</button>
+        <button data-go="confidentialite">Confidentialité</button>
+        <button data-go="mentions-legales">Mentions légales</button>
+      </nav>
+    </div>
+  </div>
+  <div class="wrap foot-bottom">
+    <address id="foot-seller"></address>
   </div>
 </footer>
 <div class="toast" id="toast" hidden></div>
@@ -275,7 +344,14 @@ const CONFIG = {
   SUPABASE_URL: "https://ybbxrlwshpaerinkowan.supabase.co",
   SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InliYnhybHdzaHBhZXJpbmtvd2FuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0MjA0NTksImV4cCI6MjEwODk5NjQ1OX0.Ji93ABv2jeUL5WzruGG3ij3VfLZ0M_NBxrVZDqtZhng",  // clé publique, sans danger
   CURRENCY: "eur",           // même devise que la fonction create-checkout
-  SUPPORT_EMAIL: "",         // affiché en pied de page
+  SUPPORT_EMAIL: "oasisofstyle86@gmail.com",
+  // Vendeur affiché dans les conditions de vente : doit correspondre au compte Stripe
+  SELLER_NAME: "OASIS OF STYLE LLC",
+  SELLER_ADDRESS: "1209 Mountain Road Pl NE, Ste R, Albuquerque, NM 87110, États-Unis",
+  SELLER_STATE: "Nouveau-Mexique (États-Unis)",
+  TERMS_DATE: "2 novembre 2026",
+  REFUND_DAYS: 30,           // délai pour signaler un défaut
+  FIX_DAYS: 7,               // délai que le vendeur se donne pour corriger
 };
 
 /* ====================================================================== */
@@ -297,7 +373,7 @@ const S = {
   user: null, profile: null, recovery: false,
   cart: store.get("cart", []),
   search: "", filters: { cats: [], plats: [], billing: "", sort: "pop" },
-  tab: "desc", authMode: "login", editing: null,
+  tab: "desc", authMode: "login", editing: null, editingAccess: null, accepted: false,
   demoLicenses: [], demoOrders: [],
 };
 
@@ -354,6 +430,11 @@ const DEMO_DATA = (() => {
       features: ["Vérification de signature", "Journal consultable", "Rejeu d'un événement", "Docker prêt à l'emploi"],
       requirements: "Docker 24+ ou Node.js 20+." }),
   ];
+  products.forEach((p) => Object.assign(p, {
+    included: ["Une licence pour 1 appareil", "Accès au logiciel", "Instructions de première utilisation", "Mises à jour de correction incluses"],
+    delivery_info: "Livraison numérique immédiate : la clé et les instructions apparaissent dans « Mes licences » dès le paiement validé.",
+    language: "Français", faq: [{ q: "Faut-il une connexion internet ?", a: "Non pour l'usage quotidien ; elle sert à synchroniser vos appareils." }],
+  }));
   const ratings = { d1: { avg_rating: 4.7, review_count: 23 }, d2: { avg_rating: 4.5, review_count: 11 }, d3: { avg_rating: 4.8, review_count: 17 }, d4: { avg_rating: 4.2, review_count: 8 }, d6: { avg_rating: 4.6, review_count: 31 }, d5: { avg_rating: 4.0, review_count: 4 } };
   const reviews = {
     d1: [{ author_name: "Hery R. (exemple)", rating: 5, comment: "La clôture de caisse me fait gagner une demi-heure chaque soir.", created_at: "2026-09-12" },
@@ -396,6 +477,17 @@ const api = {
       .neq("status", "pending").order("created_at", { ascending: false });
     if (error) throw error; return data;
   },
+  async access(productIds) {
+    if (DEMO || !productIds.length) return {};
+    const { data } = await sb.from("product_access").select("product_id, access_url, instructions").in("product_id", productIds);
+    return Object.fromEntries((data || []).map((a) => [a.product_id, a]));
+  },
+  async tickets(all = false) {
+    if (DEMO) return S.demoTickets || [];
+    let q = sb.from("support_tickets").select("*").order("created_at", { ascending: false }).limit(100);
+    if (!all) q = q.eq("user_id", S.user.id);
+    const { data, error } = await q; if (error) throw error; return data;
+  },
   async invoke(fn, body) {
     const { data, error } = await sb.functions.invoke(fn, { body });
     if (error) {
@@ -436,7 +528,10 @@ function card(p) {
       ${ratingLine(p)}
     </div>
     <div class="card-foot">${priceHtml(p)}
-      <button class="btn small primary" data-add="${p.id}" aria-label="Ajouter ${esc(p.name)} au panier">Ajouter</button></div>
+      <div class="card-btns">
+        <button class="btn small" data-add="${p.id}" aria-label="Ajouter ${esc(p.name)} au panier">Au panier</button>
+        <button class="btn small primary" data-go="p-${esc(p.slug)}" data-buyfocus aria-label="Acheter ${esc(p.name)}">Acheter</button>
+      </div></div>
   </article>`;
 }
 const cat = (id) => S.categories.find((c) => c.id === id);
@@ -458,21 +553,41 @@ function addToCart(id) {
 const cartLines = () => S.cart.map((l) => ({ ...l, p: prod(l.id) })).filter((l) => l.p);
 const cartTotal = () => cartLines().reduce((s, l) => s + l.p.price_cents * l.qty, 0);
 
-async function checkout(btn) {
-  if (!cartLines().length) return;
-  if (!S.user) { S.authMode = "login"; go("compte"); toast("Connectez-vous pour finaliser l'achat"); return; }
+/** lines : [{ id, qty }] — le panier, ou un seul logiciel pour « Acheter maintenant ». */
+async function checkout(btn, lines = S.cart) {
+  const items = lines.map((l) => ({ ...l, p: prod(l.id) })).filter((l) => l.p);
+  if (!items.length) return;
+  const box = $("#accept-terms");
+  if (!box?.checked) {
+    box?.closest(".terms")?.classList.add("need");
+    box?.focus();
+    toast("Cochez la case d'acceptation des conditions de vente");
+    return;
+  }
+  S.accepted = true;
+  if (!S.user) { S.pendingBuy = lines; S.authMode = "login"; go("compte"); toast("Connectez-vous pour finaliser l'achat"); return; }
   if (DEMO) {
-    const order = { id: "demo-" + Date.now(), status: "paid", total_cents: cartTotal(), created_at: new Date().toISOString(),
-      order_items: cartLines().map((l) => ({ product_name: l.p.name, quantity: l.qty, unit_cents: l.p.price_cents })) };
+    const total = items.reduce((s, l) => s + l.p.price_cents * l.qty, 0);
+    const order = { id: "demo-" + Date.now(), status: "paid", total_cents: total, created_at: new Date().toISOString(),
+      order_items: items.map((l) => ({ product_name: l.p.name, quantity: l.qty, unit_cents: l.p.price_cents })) };
     S.demoOrders.unshift(order);
-    cartLines().forEach((l) => { for (let i = 0; i < l.qty; i++) S.demoLicenses.unshift({ id: crypto.randomUUID(), license_key: demoKey(), status: "active", activations: 0, max_activations: 1, created_at: order.created_at, product_id: l.p.id, products: l.p }); });
+    items.forEach((l) => { for (let i = 0; i < l.qty; i++) S.demoLicenses.unshift({ id: crypto.randomUUID(), license_key: demoKey(), status: "active", activations: 0, max_activations: 1, created_at: order.created_at, product_id: l.p.id, products: l.p }); });
+    if (lines === S.cart) { S.cart = []; saveCart(); }
     go("merci"); return;
   }
+  const label = btn.textContent;
   btn.disabled = true; btn.textContent = "Redirection vers le paiement…";
   try {
-    const { url } = await api.invoke("create-checkout", { items: S.cart.map((l) => ({ product_id: l.id, quantity: l.qty })) });
+    const { url } = await api.invoke("create-checkout", { items: items.map((l) => ({ product_id: l.id, quantity: l.qty })), accept_terms: true });
+    if (lines === S.cart) store.set("clearCartOnReturn", true);
     location.href = url;
-  } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = "Payer en toute sécurité"; }
+  } catch (e) { toast(e.message); btn.disabled = false; btn.textContent = label; }
+}
+function termsBox() {
+  return `<label class="terms"><input type="checkbox" id="accept-terms" ${S.accepted ? "checked" : ""}>
+    <span>J'accepte les <button type="button" class="link" data-go="conditions">conditions générales de vente</button> et la
+    <button type="button" class="link" data-go="remboursement">politique de remboursement</button>. Je demande la livraison immédiate
+    du logiciel et reconnais perdre mon droit de rétractation dès sa mise à disposition.</span></label>`;
 }
 function demoKey() { const a = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; return [0, 1, 2, 3].map(() => Array.from({ length: 5 }, () => a[Math.floor(Math.random() * a.length)]).join("")).join("-"); }
 
@@ -495,7 +610,9 @@ function render() {
   else if (r.startsWith("p-")) html = viewProduct(r.slice(2));
   else if (r === "panier") html = viewCart();
   else if (r === "merci") html = viewThanks();
-  else if (["compte", "licences", "commandes", "admin"].includes(r)) html = viewAccount(r);
+  else if (r === "aide") html = viewHelp();
+  else if (LEGAL[r]) html = viewLegal(r);
+  else if (["compte", "licences", "commandes", "demandes", "admin"].includes(r)) html = viewAccount(r);
   else html = viewHome();
   v.innerHTML = html;
   afterRender(r);
@@ -607,28 +724,41 @@ function viewProduct(slug) {
       <dl class="spec">
         <dt>Version</dt><dd class="mono">${esc(p.version || "—")}</dd>
         <dt>Plateformes</dt><dd>${esc((p.platforms || []).join(", ") || "—")}</dd>
-        <dt>Licence</dt><dd>1 poste par licence</dd>
-        <dt>Livraison</dt><dd>Clé et téléchargement immédiats</dd>
+        <dt>Licence</dt><dd>1 appareil par licence</dd>
+        <dt>Langue</dt><dd>${esc(p.language || "Français")}</dd>
+        <dt>Livraison</dt><dd>Immédiate et automatique, par votre espace client</dd>
+        <dt>Assistance</dt><dd><button class="link" data-go="aide">Service client par écrit</button></dd>
       </dl>
       ${(p.features || []).length ? `<ul class="checks">${p.features.slice(0, 4).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
     </div>
     <aside class="buybox">
       ${priceHtml(p)}
-      ${p.billing !== "one_time" ? `<p class="muted" style="font-size:13px">Résiliable à tout moment. La licence reste active jusqu'à la fin de la période payée.</p>` : `<p class="muted" style="font-size:13px">Paiement unique, mises à jour mineures incluses.</p>`}
-      <button class="btn primary big" data-add="${p.id}">Ajouter au panier</button>
-      <button class="btn big" data-buy="${p.id}">Acheter maintenant</button>
-      <p class="muted" style="font-size:13px;display:flex;gap:8px;align-items:center"><span style="width:16px;display:inline-flex">${ICONS.lock}</span>Paiement sécurisé par Stripe</p>
+      ${p.billing !== "one_time" ? `<p class="muted" style="font-size:13px">Résiliable à tout moment. La licence reste active jusqu'à la fin de la période payée.</p>` : `<p class="muted" style="font-size:13px">Paiement unique. Mises à jour de correction incluses.</p>`}
+      <button class="btn primary big" id="buy-now" data-buy="${p.id}">Acheter maintenant</button>
+      <button class="btn big" data-add="${p.id}">Ajouter au panier</button>
+      ${termsBox()}
+      <ul class="checks" style="font-size:13px">
+        <li>Clé de licence livrée automatiquement après le paiement</li>
+        <li>Paiement sécurisé par Stripe</li>
+        <li><span>Une question avant d'acheter ? <button class="link" data-go="aide" style="font-size:13px">Contactez-nous</button></span></li>
+      </ul>
     </aside>
   </div>
   <section>
     <div class="tabs" role="tablist">
-      ${[["desc", "Description"], ["feat", "Fonctionnalités"], ["req", "Configuration requise"], ["rev", `Avis${S.ratings[p.id] ? ` (${S.ratings[p.id].review_count})` : ""}`]]
+      ${[["desc", "Description"], ["feat", "Fonctionnalités"], ["incl", "Inclus et livraison"], ["req", "Configuration requise"], ["faq", "Questions fréquentes"], ["rev", `Avis${S.ratings[p.id] ? ` (${S.ratings[p.id].review_count})` : ""}`]]
         .map(([k, l]) => `<button role="tab" data-tab="${k}" aria-selected="${S.tab === k}">${l}</button>`).join("")}
     </div>
     <div class="tab-panel" id="tab-panel">
       ${S.tab === "desc" ? desc || `<p class="muted">Pas encore de description.</p>` : ""}
       ${S.tab === "feat" ? `<ul class="checks">${(p.features || []).map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : ""}
+      ${S.tab === "incl" ? `<h3 style="margin-bottom:10px">Ce que vous recevez</h3>
+        ${(p.included || []).length ? `<ul class="checks">${p.included.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>` : `<p class="muted">Une clé de licence et l'accès au logiciel.</p>`}
+        <h3 style="margin:18px 0 8px">Livraison</h3>
+        <p>${esc(p.delivery_info || "Livraison numérique immédiate : votre clé et vos instructions apparaissent dans « Mon espace → Mes licences » dès que le paiement est validé.")}</p>
+        <p class="muted" style="margin-top:8px">Rien ne vous parvient dans l'heure qui suit le paiement ? <button class="link" data-go="aide">Écrivez au service client</button>. Voir aussi la <button class="link" data-go="livraison">politique de livraison</button> et la <button class="link" data-go="remboursement">politique de remboursement</button>.</p>` : ""}
       ${S.tab === "req" ? `<p>${esc(p.requirements || "Non précisée.")}</p>` : ""}
+      ${S.tab === "faq" ? `<div class="faq">${(p.faq || []).length ? p.faq.map((f) => `<details><summary>${esc(f.q)}</summary><p>${esc(f.a)}</p></details>`).join("") : `<p class="muted">Pas encore de questions. <button class="link" data-go="aide">Posez la vôtre</button>.</p>`}</div>` : ""}
       ${S.tab === "rev" ? `<div id="reviews" data-pid="${p.id}"><p class="muted">Chargement des avis…</p></div>` : ""}
     </div>
   </section>
@@ -659,28 +789,30 @@ function viewCart() {
         <div class="muted"><span>Codes promo</span><span>sur la page de paiement</span></div>
         <div class="grand"><span>Total</span><span>${money(cartTotal())}${PER[lines[0].p.billing]}</span></div>
       </div>
+      ${termsBox()}
       <button class="btn primary big" data-checkout>${S.user ? "Payer en toute sécurité" : "Se connecter et payer"}</button>
-      <p class="muted" style="font-size:13px">${sub ? "Abonnement renouvelé automatiquement, résiliable à tout moment." : "Vos clés de licence apparaissent dans « Mes licences » dès le paiement validé."}</p>
+      <p class="muted" style="font-size:13px">${sub ? "Abonnement renouvelé automatiquement, résiliable à tout moment depuis le service client." : "Livraison immédiate : vos clés de licence apparaissent dans « Mes licences » dès le paiement validé."}</p>
     </aside>
   </div>`;
 }
 
 function viewThanks() {
-  S.cart = []; saveCart();
+  if (store.get("clearCartOnReturn", false)) { S.cart = []; saveCart(); store.set("clearCartOnReturn", false); }
   return `<div class="empty panel">
     <span class="pill ok">Paiement reçu</span>
     <h1>Merci pour votre achat</h1>
-    <p class="muted" style="max-width:52ch">Vos clés de licence et vos liens de téléchargement sont dans votre espace client. Un reçu Stripe vous a été envoyé par e-mail.</p>
+    <p class="muted" style="max-width:52ch">Votre logiciel est livré automatiquement : la clé de licence et les instructions d'accès s'affichent ci-dessous et restent dans « Mes licences ». Un reçu Stripe vous est envoyé par e-mail.</p>
     <div id="thanks-status" class="muted" style="font-size:14px"></div>
-    <button class="btn primary big" data-go="licences">Voir mes licences</button>
-  </div>`;
+  </div>
+  <section id="thanks-list" style="display:grid;gap:16px"></section>
+  <p class="muted" style="text-align:center">Un problème avec votre commande ? <button class="link" data-go="aide">Contactez le service client</button></p>`;
 }
 
 function viewAccount(tab) {
   if (!S.user) return viewAuth();
   if (tab === "admin" && !isAdmin()) tab = "licences";
   if (tab === "compte") tab = "licences";
-  const nav = [["licences", "Mes licences"], ["commandes", "Mes commandes"], ...(isAdmin() ? [["admin", "Administration"]] : [])];
+  const nav = [["licences", "Mes licences"], ["commandes", "Mes commandes"], ["demandes", "Mes demandes d'aide"], ...(isAdmin() ? [["admin", "Administration"]] : [])];
   return `<div class="acct">
     <aside class="panel" style="gap:10px">
       <div><b>${esc(S.profile?.full_name || S.user.email)}</b><div class="muted" style="font-size:13px;overflow-wrap:anywhere">${esc(S.user.email)}</div></div>
@@ -710,15 +842,225 @@ function viewAuth() {
     </form></div>`;
 }
 
+
+/* ---------------- Pages légales ---------------- */
+const SELLER = () => `<b>${esc(CONFIG.SELLER_NAME)}</b>, ${esc(CONFIG.SELLER_ADDRESS)}`;
+const MAIL = () => `<code>${esc(CONFIG.SUPPORT_EMAIL)}</code>`;
+const LEGAL = {
+  conditions: { title: "Conditions générales de vente", body: () => `
+    <p>Les présentes conditions s'appliquent à toute commande passée sur la boutique ${esc(CONFIG.SHOP_NAME)}. En cochant la case d'acceptation avant le paiement, vous déclarez les avoir lues et acceptées.</p>
+    <h2>1. Vendeur</h2>
+    <p>Les logiciels sont vendus par ${SELLER()}. Contact : ${MAIL()} ou le formulaire de la page <button class="link" data-go="aide">Aide et service client</button>.</p>
+    <h2>2. Produits</h2>
+    <p>La boutique vend des licences d'utilisation de logiciels sous forme numérique. Chaque fiche décrit le logiciel, ses fonctionnalités, la configuration requise et ce qui est inclus. Une licence permet d'utiliser le logiciel sur un appareil, sauf mention contraire sur la fiche. Le logiciel reste la propriété de son éditeur : la licence ne donne pas le droit de le revendre, de le copier pour d'autres personnes ou de le modifier.</p>
+    <h2>3. Prix</h2>
+    <p>Les prix sont indiqués en euros. Le montant total à payer, taxes éventuelles comprises, est affiché sur la page de paiement avant votre validation. Le prix appliqué est celui affiché au moment de la commande.</p>
+    <h2>4. Commande et compte client</h2>
+    <p>Pour acheter, vous créez un compte avec une adresse e-mail valide. La commande est ferme dès la validation du paiement. Vous êtes responsable de la confidentialité de votre mot de passe.</p>
+    <h2>5. Paiement</h2>
+    <p>Le paiement se fait par carte bancaire sur une page sécurisée de notre prestataire Stripe. Nous ne voyons et ne conservons jamais votre numéro de carte. Votre relevé bancaire mentionne le nom du vendeur.</p>
+    <h2>6. Livraison</h2>
+    <p>La livraison est numérique, immédiate et automatique : dès la validation du paiement, votre clé de licence et vos instructions d'accès apparaissent dans « Mon espace → Mes licences ». Voir la <button class="link" data-go="livraison">politique de livraison</button>.</p>
+    <h2>7. Droit de rétractation</h2>
+    <p>Pour un contenu numérique fourni immédiatement, vous demandez expressément, en cochant la case prévue avant le paiement, que la livraison commence tout de suite, et vous reconnaissez perdre votre droit de rétractation dès la mise à disposition du logiciel. Cela ne remet pas en cause la garantie décrite dans la <button class="link" data-go="remboursement">politique de remboursement</button>.</p>
+    <h2>8. Abonnements</h2>
+    <p>Lorsqu'un logiciel est vendu en abonnement, celui-ci se renouvelle automatiquement à chaque période (mois ou année) au prix en vigueur. Vous pouvez le résilier à tout moment en écrivant au service client : la résiliation prend effet à la fin de la période déjà payée, sans remboursement de la période en cours.</p>
+    <h2>9. Garantie et responsabilité</h2>
+    <p>Nous nous engageons à fournir un logiciel conforme à sa description et à corriger les défauts signalés. Le logiciel est fourni pour l'usage décrit sur sa fiche ; il vous appartient de vérifier qu'il correspond à vos besoins et de sauvegarder régulièrement vos données. Notre responsabilité est limitée au montant payé pour la licence concernée, sauf disposition légale impérative contraire.</p>
+    <h2>10. Utilisation interdite</h2>
+    <p>Il est interdit de partager une clé de licence, de contourner la vérification de licence ou d'utiliser le logiciel pour une activité illégale. En cas de fraude, la licence peut être désactivée.</p>
+    <h2>11. Restrictions</h2>
+    <p>Nous ne vendons pas aux personnes ou pays visés par des sanctions économiques des États-Unis.</p>
+    <h2>12. Réclamations et litiges</h2>
+    <p>Pour toute réclamation, contactez d'abord le service client : nous répondons sous 2 jours ouvrés. Nous vous invitons à nous écrire avant de contester un paiement auprès de votre banque, afin que nous puissions résoudre le problème rapidement. Les présentes conditions sont régies par le droit de l'État du ${esc(CONFIG.SELLER_STATE)}, sans priver le consommateur des protections impératives de son pays de résidence.</p>` },
+
+  remboursement: { title: "Politique de remboursement", body: () => `
+    <p>Nos logiciels sont livrés immédiatement après le paiement. Nous remboursons donc les achats lorsque le logiciel ne fonctionne pas, et non en cas de simple changement d'avis.</p>
+    <h2>Quand êtes-vous remboursé ?</h2>
+    <ul>
+      <li><b>Logiciel défectueux :</b> vous signalez au service client, dans les ${CONFIG.REFUND_DAYS} jours suivant l'achat, un problème qui empêche d'utiliser une fonction principale du logiciel. Si nous ne le corrigeons pas dans les ${CONFIG.FIX_DAYS} jours suivant votre signalement, vous êtes remboursé intégralement.</li>
+      <li><b>Logiciel non livré :</b> si vous n'avez pas pu accéder à votre logiciel et que nous ne trouvons pas de solution.</li>
+      <li><b>Achat en double par erreur :</b> la licence en trop est remboursée si elle n'a jamais été activée.</li>
+    </ul>
+    <h2>Quand n'êtes-vous pas remboursé ?</h2>
+    <ul>
+      <li>Simple changement d'avis après la livraison.</li>
+      <li>Appareil qui ne respecte pas la configuration requise indiquée sur la fiche du logiciel.</li>
+      <li>Licence partagée ou utilisée de manière contraire aux <button class="link" data-go="conditions">conditions de vente</button>.</li>
+    </ul>
+    <h2>Comment demander un remboursement ?</h2>
+    <ol>
+      <li>Écrivez-nous depuis la page <button class="link" data-go="aide">Aide et service client</button> en choisissant « Remboursement », ou à ${MAIL()}.</li>
+      <li>Indiquez votre clé de licence et décrivez le problème (une capture d'écran aide beaucoup).</li>
+      <li>Nous répondons sous 2 jours ouvrés.</li>
+    </ol>
+    <h2>Comment se passe le remboursement ?</h2>
+    <p>Le remboursement est fait sur la carte utilisée pour le paiement, par Stripe. Il apparaît sur votre compte en général sous 5 à 10 jours ouvrés, selon votre banque. La licence remboursée est désactivée automatiquement.</p>
+    <h2>Abonnements</h2>
+    <p>Vous pouvez résilier un abonnement à tout moment : il ne sera plus renouvelé et reste actif jusqu'à la fin de la période payée. La période en cours n'est pas remboursée, sauf défaut du logiciel comme décrit plus haut.</p>` },
+
+  livraison: { title: "Livraison des logiciels", body: () => `
+    <p>Tous nos produits sont des logiciels numériques. Il n'y a aucun envoi physique ni frais de livraison.</p>
+    <h2>Délai</h2>
+    <p>La livraison est immédiate et automatique : dès que Stripe confirme votre paiement (en général en quelques secondes), votre clé de licence est créée et s'affiche sur la page de confirmation, puis dans « Mon espace → Mes licences ».</p>
+    <h2>Ce que vous recevez</h2>
+    <ul>
+      <li>Une clé de licence personnelle par appareil acheté.</li>
+      <li>Le lien d'accès ou le fichier d'installation du logiciel.</li>
+      <li>Les instructions pour la première utilisation.</li>
+      <li>Un reçu de paiement envoyé par Stripe à votre adresse e-mail.</li>
+    </ul>
+    <h2>Zone de vente</h2>
+    <p>Les logiciels sont disponibles dans tous les pays où Stripe accepte les paiements, sauf les pays visés par des sanctions économiques des États-Unis.</p>
+    <h2>Un problème ?</h2>
+    <p>Si votre licence n'apparaît pas dans l'heure qui suit le paiement, <button class="link" data-go="aide">écrivez au service client</button> en indiquant l'adresse e-mail de votre compte. Nous vous la livrons manuellement sous 24 heures ouvrées.</p>` },
+
+  confidentialite: { title: "Politique de confidentialité", body: () => `
+    <p>Cette politique explique quelles données nous collectons sur la boutique et ce que nous en faisons. Responsable : ${SELLER()}.</p>
+    <h2>Données collectées</h2>
+    <ul>
+      <li><b>Compte :</b> nom, adresse e-mail, mot de passe (enregistré chiffré, nous ne pouvons pas le lire).</li>
+      <li><b>Commandes :</b> logiciels achetés, montants, dates, clés de licence, acceptation des conditions de vente.</li>
+      <li><b>Service client :</b> les messages que vous nous envoyez.</li>
+      <li><b>Activation :</b> un identifiant de l'appareil sur lequel la licence est activée.</li>
+    </ul>
+    <p>Nous ne collectons pas vos données de carte bancaire : elles sont saisies directement chez Stripe.</p>
+    <h2>Pourquoi ?</h2>
+    <p>Pour livrer vos logiciels, gérer vos licences, répondre à vos demandes, prévenir la fraude et respecter nos obligations comptables. Nous ne vendons pas vos données et n'envoyons pas de publicité.</p>
+    <h2>Prestataires</h2>
+    <ul>
+      <li><b>Stripe</b> : paiement.</li>
+      <li><b>Supabase</b> : hébergement de la base de données et des comptes clients.</li>
+      <li><b>GitHub Pages</b> : hébergement du site.</li>
+    </ul>
+    <h2>Durée de conservation</h2>
+    <p>Les données de compte sont gardées tant que votre compte existe. Les données de commande sont gardées le temps exigé par les obligations comptables.</p>
+    <h2>Vos droits</h2>
+    <p>Vous pouvez demander à consulter, corriger ou supprimer vos données en écrivant à ${MAIL()}. La suppression du compte désactive l'accès à vos licences.</p>
+    <h2>Stockage dans le navigateur</h2>
+    <p>Le site garde dans votre navigateur votre panier et votre session de connexion. Il n'utilise aucun cookie publicitaire ni outil de suivi.</p>` },
+
+  "mentions-legales": { title: "Mentions légales", body: () => `
+    <h2>Éditeur du site et vendeur</h2>
+    <p>${SELLER()}</p>
+    <p>Contact : ${MAIL()}</p>
+    <h2>Hébergement</h2>
+    <p>Site : GitHub Pages (GitHub, Inc., San Francisco, États-Unis). Base de données : Supabase. Paiements : Stripe.</p>
+    <h2>Propriété intellectuelle</h2>
+    <p>Les logiciels, textes et images de la boutique sont protégés. Toute reproduction sans autorisation est interdite.</p>` },
+};
+const LEGAL_ORDER = ["conditions", "remboursement", "livraison", "confidentialite", "mentions-legales"];
+function viewLegal(key) {
+  const page = LEGAL[key];
+  return `<nav class="legal-nav" aria-label="Informations légales">${LEGAL_ORDER.map((k) => `<button data-go="${k}" aria-current="${k === key}">${LEGAL[k].title}</button>`).join("")}</nav>
+  <article class="prose panel">
+    <h1>${page.title}</h1>
+    <p class="updated">Version du ${esc(CONFIG.TERMS_DATE)}</p>
+    ${page.body()}
+  </article>`;
+}
+
+/* ---------------- Aide et service client ---------------- */
+const TOPICS = { question: "Question générale", "avant-achat": "Question avant achat", paiement: "Paiement", licence: "Clé de licence ou activation", installation: "Installation ou utilisation", remboursement: "Remboursement", autre: "Autre" };
+const GENERAL_FAQ = [
+  ["Quand vais-je recevoir mon logiciel ?", "Immédiatement : dès la validation du paiement, la clé et les instructions s'affichent sur la page de confirmation et dans « Mon espace → Mes licences »."],
+  ["Je ne trouve pas ma clé de licence.", "Connectez-vous avec l'adresse e-mail utilisée pour l'achat, puis ouvrez « Mon espace → Mes licences ». Si elle n'y est pas une heure après le paiement, écrivez-nous ci-dessous."],
+  ["Puis-je utiliser une licence sur plusieurs appareils ?", "Une licence correspond à un appareil. Pour plusieurs postes, augmentez la quantité dans le panier."],
+  ["Quels moyens de paiement acceptez-vous ?", "Les cartes bancaires (Visa, Mastercard, American Express…) et, selon votre pays, d'autres moyens proposés par Stripe sur la page de paiement."],
+  ["Puis-je être remboursé ?", "Oui si le logiciel ne fonctionne pas et que nous ne corrigeons pas le problème : voir la politique de remboursement."],
+  ["Comment résilier un abonnement ?", "Écrivez-nous avec le sujet « Paiement » : l'abonnement ne sera plus renouvelé et reste actif jusqu'à la fin de la période payée."],
+];
+function viewHelp() {
+  const u = S.user;
+  return `<div class="crumbs"><button data-go="">Accueil</button><span>›</span><span>Aide et service client</span></div>
+  <div class="two-col">
+    <section style="display:grid;gap:20px;min-width:0">
+      <div class="panel">
+        <h1 style="font-size:1.6rem">Aide et service client</h1>
+        <div class="faq">${GENERAL_FAQ.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join("")}</div>
+      </div>
+      <form class="panel form" id="ticket-form">
+        <h2>Écrire au service client</h2>
+        <p class="muted" style="font-size:14px">Nous répondons sous 2 jours ouvrés. ${u ? "La réponse s'affichera aussi dans « Mon espace → Mes demandes d'aide »." : "Nous vous répondrons à l'adresse e-mail indiquée."}</p>
+        <div class="row2">
+          <div class="field"><label for="tk-name">Votre nom</label><input id="tk-name" type="text" maxlength="120" required value="${esc(S.profile?.full_name || "")}" autocomplete="name"></div>
+          <div class="field"><label for="tk-email">Adresse e-mail</label><input id="tk-email" type="email" maxlength="200" required value="${esc(u?.email || "")}" autocomplete="email"></div>
+          <div class="field"><label for="tk-topic">Sujet</label><select id="tk-topic">${Object.entries(TOPICS).map(([k, l]) => `<option value="${k}">${l}</option>`).join("")}</select></div>
+          <div class="field"><label for="tk-ref">Clé de licence ou commande (facultatif)</label><input id="tk-ref" type="text" maxlength="80" placeholder="ex. ABCDE-FGHJK-…"></div>
+        </div>
+        <div class="field"><label for="tk-msg">Votre message</label><textarea id="tk-msg" rows="6" minlength="5" maxlength="4000" required placeholder="Décrivez votre question ou le problème rencontré."></textarea></div>
+        <div id="tk-out"></div>
+        <div><button class="btn primary" type="submit">Envoyer le message</button></div>
+      </form>
+      <div id="my-tickets" style="display:grid;gap:12px"></div>
+    </section>
+    <aside class="panel contact-card">
+      <h2>Nous contacter</h2>
+      <span>Par e-mail</span>
+      <code>${esc(CONFIG.SUPPORT_EMAIL)}</code>
+      <span style="margin-top:8px">Adresse</span>
+      <address style="font-style:normal">${esc(CONFIG.SELLER_NAME)}<br>${esc(CONFIG.SELLER_ADDRESS)}</address>
+      <span style="margin-top:8px">Délai de réponse</span>
+      <b>2 jours ouvrés au plus</b>
+      <div class="legal-nav" style="margin-top:12px">
+        <button data-go="livraison">Livraison</button><button data-go="remboursement">Remboursement</button><button data-go="conditions">Conditions de vente</button>
+      </div>
+    </aside>
+  </div>`;
+}
+const TICKET_STATUS = { open: ["", "En attente de réponse"], answered: ["ok", "Répondu"], closed: ["", "Clos"] };
+function ticketHtml(t, admin = false) {
+  const st = TICKET_STATUS[t.status] || TICKET_STATUS.open;
+  return `<article class="ticket">
+    <div class="ticket-head"><b>${esc(TOPICS[t.topic] || t.topic)}</b><span class="pill ${st[0]}">${st[1]}</span></div>
+    <span class="muted" style="font-size:13px">${new Date(t.created_at).toLocaleString("fr-FR", { dateStyle: "medium", timeStyle: "short" })}${admin ? ` · ${esc(t.name)} · <code style="user-select:all">${esc(t.email)}</code>` : ""}${t.order_ref ? ` · Réf. ${esc(t.order_ref)}` : ""}</span>
+    <p class="msg">${esc(t.message)}</p>
+    ${t.reply ? `<div class="reply"><b>Réponse du service client</b>${t.replied_at ? ` <span class="muted" style="font-size:12px">(${new Date(t.replied_at).toLocaleDateString("fr-FR")})</span>` : ""}<br>${esc(t.reply)}</div>` : ""}
+    ${admin && t.status !== "closed" ? `<form class="form" data-reply-form="${t.id}">
+      <div class="field"><label for="rp-${t.id}">${t.reply ? "Modifier la réponse" : "Votre réponse"}</label><textarea id="rp-${t.id}" rows="3" maxlength="4000" required>${esc(t.reply || "")}</textarea>
+      <small>${t.user_id ? "Le client la verra dans son espace." : "Ce visiteur n'a pas de compte : envoyez-lui aussi la réponse par e-mail à l'adresse ci-dessus."}</small></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary small" type="submit">Enregistrer la réponse</button><button class="btn small" type="button" data-ticket-close="${t.id}">Clore la demande</button></div>
+    </form>` : ""}
+  </article>`;
+}
+async function loadMyTickets() {
+  const box = $("#my-tickets"); if (!box || !S.user) return;
+  const list = await api.tickets().catch(() => []);
+  box.innerHTML = list.length ? `<h2>Vos demandes</h2>${list.slice(0, 5).map((t) => ticketHtml(t)).join("")}` : "";
+}
+async function viewMyTickets() {
+  const list = await api.tickets();
+  return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="font-size:1.6rem">Mes demandes d'aide</h1><button class="btn primary" data-go="aide">Nouvelle demande</button></div>
+    ${list.length ? list.map((t) => ticketHtml(t)).join("") : `<div class="empty panel"><p class="muted">Vous n'avez encore envoyé aucune demande.</p></div>`}`;
+}
+async function sendTicket(f) {
+  const out = $("#tk-out"), btn = f.querySelector("[type=submit]");
+  const row = { name: $("#tk-name").value.trim(), email: $("#tk-email").value.trim(), topic: $("#tk-topic").value,
+    order_ref: $("#tk-ref").value.trim() || null, message: $("#tk-msg").value.trim(), user_id: S.user?.id ?? null };
+  if (DEMO) { (S.demoTickets ||= []).unshift({ ...row, id: crypto.randomUUID(), status: "open", created_at: new Date().toISOString() }); }
+  else {
+    btn.disabled = true;
+    const { error } = await sb.from("support_tickets").insert(row);   // pas de .select() : un visiteur ne peut pas relire
+    btn.disabled = false;
+    if (error) { out.innerHTML = `<div class="notice bad">Le message n'a pas pu être envoyé. Vérifiez les champs, ou écrivez directement à ${esc(CONFIG.SUPPORT_EMAIL)}.</div>`; return; }
+  }
+  f.reset(); $("#tk-name").value = row.name; $("#tk-email").value = row.email;
+  out.innerHTML = `<div class="notice ok">Message envoyé. Nous vous répondons sous 2 jours ouvrés.</div>`;
+  loadMyTickets();
+}
+
 /* ---------------- Contenu chargé après affichage ---------------- */
 async function afterRender(r) {
   if (r.startsWith("p-") && S.tab === "rev") loadReviews();
-  if (r === "merci" && !DEMO) pollLicenses();
+  if (r.startsWith("p-") && S.focusBuy) { S.focusBuy = false; const b = $("#buy-now"); b?.scrollIntoView({ block: "center" }); b?.focus({ preventScroll: true }); }
+  if (r === "merci") pollLicenses();
+  if (r === "aide") loadMyTickets();
   const body = $("#acct-body"); if (!body) return;
   const tab = body.dataset.tab;
   try {
     if (tab === "licences") body.innerHTML = await viewLicenses();
     if (tab === "commandes") body.innerHTML = await viewOrders();
+    if (tab === "demandes") body.innerHTML = await viewMyTickets();
     if (tab === "admin") { body.innerHTML = await viewAdmin(); loadStripePanel(); }
   } catch (e) { body.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; }
 }
@@ -737,27 +1079,48 @@ async function loadReviews() {
 
 async function pollLicenses() {
   const st = $("#thanks-status"); if (!st || !S.user) return;
-  st.textContent = "Création de vos licences…";
-  for (let i = 0; i < 10; i++) {
+  st.textContent = "Livraison de vos licences en cours…";
+  for (let i = 0; i < 15; i++) {
     const lic = await api.licenses().catch(() => []);
-    const fresh = lic.filter((l) => Date.now() - new Date(l.created_at) < 15 * 60 * 1000);
-    if (fresh.length) { st.textContent = `${fresh.length} licence${fresh.length > 1 ? "s" : ""} prête${fresh.length > 1 ? "s" : ""}.`; return; }
+    const fresh = lic.filter((l) => Date.now() - new Date(l.created_at) < 30 * 60 * 1000);
+    if (fresh.length) {
+      if (!$("#thanks-status")) return;
+      st.textContent = `${fresh.length} licence${fresh.length > 1 ? "s livrées" : " livrée"}.`;
+      $("#thanks-list").innerHTML = await licenseCards(fresh);
+      return;
+    }
     await new Promise((r) => setTimeout(r, 2000));
+    if (!$("#thanks-status")) return;
   }
-  st.textContent = "Le paiement est en cours de confirmation. Vos licences apparaîtront dans quelques instants.";
+  st.innerHTML = `Le paiement est en cours de confirmation par la banque. Vos licences apparaîtront dans <button class="link" data-go="licences">Mes licences</button> dans quelques instants.`;
 }
 
+async function licenseCards(list) {
+  const access = await api.access([...new Set(list.filter((l) => l.status === "active").map((l) => l.product_id))]);
+  return list.map((l) => {
+    const a = access[l.product_id] || {};
+    const active = l.status === "active";
+    const steps = (a.instructions || "").split(/\n+/).map((x) => x.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean);
+    return `<article class="license">
+    <div class="license-head"><div><h3>${esc(l.products?.name || "Logiciel")}</h3><span class="muted" style="font-size:13px">v${esc(l.products?.version || "—")} · ${esc((l.products?.platforms || []).join(", "))} · achetée le ${new Date(l.created_at).toLocaleDateString("fr-FR")}</span></div>
+      <span class="pill ${active ? "ok" : "bad"}">${active ? "Active" : "Révoquée"}</span></div>
+    <div class="key"><code>${esc(l.license_key)}</code><button class="btn small" data-copy="${esc(l.license_key)}">Copier</button></div>
+    ${active ? `<div class="access">
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        ${a.access_url ? `<a class="btn primary small" href="${esc(a.access_url)}" target="_blank" rel="noopener">Ouvrir le logiciel</a>` : ""}
+        ${l.products?.file_path ? `<button class="btn ${a.access_url ? "" : "primary "}small" data-download="${l.product_id}">${ICONS.down.replace("<svg", '<svg width="16" height="16"')} Télécharger</button>` : ""}
+      </div>
+      ${steps.length ? `<b style="font-size:14px">Pour commencer</b><ol>${steps.map((x) => `<li>${esc(x)}</li>`).join("")}</ol>` : ""}
+      ${!a.access_url && !l.products?.file_path ? `<p class="wait">Votre lien d'accès est en préparation. Vous le trouverez ici très bientôt ; en cas d'urgence, <button class="link" data-go="aide">écrivez au service client</button> en indiquant votre clé.</p>` : ""}
+    </div>` : `<p class="muted" style="font-size:13px">Cette licence a été désactivée (remboursement ou fin d'abonnement).</p>`}
+    <span class="muted num" style="font-size:13px">Appareils activés : ${l.activations} / ${l.max_activations}</span>
+    </article>`;
+  }).join("");
+}
 async function viewLicenses() {
   const list = await api.licenses();
-  if (!list.length) return `<h1 style="font-size:1.6rem">Mes licences</h1><div class="empty panel"><h3>Aucune licence pour l'instant</h3><p class="muted">Après un achat, vos clés apparaissent ici avec le lien de téléchargement.</p><button class="btn primary" data-go="catalogue">Voir le catalogue</button></div>`;
-  return `<h1 style="font-size:1.6rem">Mes licences</h1>${list.map((l) => `<article class="license">
-    <div class="license-head"><div><h3>${esc(l.products?.name || "Logiciel")}</h3><span class="muted" style="font-size:13px">v${esc(l.products?.version || "—")} · ${esc((l.products?.platforms || []).join(", "))} · achetée le ${new Date(l.created_at).toLocaleDateString("fr-FR")}</span></div>
-      <span class="pill ${l.status === "active" ? "ok" : "bad"}">${l.status === "active" ? "Active" : "Révoquée"}</span></div>
-    <div class="key"><code>${esc(l.license_key)}</code><button class="btn small" data-copy="${esc(l.license_key)}">Copier</button></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-      <span class="muted num" style="font-size:13px">Postes activés : ${l.activations} / ${l.max_activations}</span>
-      ${l.status === "active" ? `<button class="btn primary small" data-download="${l.product_id}">${ICONS.down.replace("<svg", '<svg width="16" height="16"')} Télécharger</button>` : ""}
-    </div></article>`).join("")}`;
+  if (!list.length) return `<h1 style="font-size:1.6rem">Mes licences</h1><div class="empty panel"><h3>Aucune licence pour l'instant</h3><p class="muted">Après un achat, vos clés et vos instructions d'accès apparaissent ici automatiquement.</p><button class="btn primary" data-go="catalogue">Voir le catalogue</button></div>`;
+  return `<h1 style="font-size:1.6rem">Mes licences</h1>${await licenseCards(list)}`;
 }
 
 async function viewOrders() {
@@ -784,9 +1147,20 @@ async function adminStats() {
 async function viewAdmin() {
   const st = await adminStats();
   const ed = S.editing;
+  const tickets = await api.tickets(true).catch(() => []);
+  const openTickets = tickets.filter((t) => t.status === "open");
+  if (ed && ed !== "new" && !DEMO && S.editingAccess?.product_id !== ed) {
+    const { data } = await sb.from("product_access").select("*").eq("product_id", ed).maybeSingle();
+    S.editingAccess = data || { product_id: ed };
+  }
   return `<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap"><h1 style="font-size:1.6rem">Administration</h1>
       <button class="btn primary" data-edit="new">Ajouter un logiciel</button></div>
     <section class="panel" id="stripe-panel" aria-live="polite"><h2>Paiements Stripe</h2><p class="muted">Vérification du lien avec Stripe…</p></section>
+    <section class="panel" id="support-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <h2>Service client</h2><span class="pill ${openTickets.length ? "promo" : "ok"}">${openTickets.length ? `${openTickets.length} demande${openTickets.length > 1 ? "s" : ""} en attente` : "Aucune demande en attente"}</span></div>
+      ${tickets.filter((t) => t.status !== "closed").slice(0, 20).map((t) => ticketHtml(t, true)).join("") || `<p class="muted">Les messages envoyés depuis la page « Aide » apparaîtront ici.</p>`}
+    </section>
     <div class="promises" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr))">
       <div class="promise" style="display:grid"><span>Chiffre d'affaires (200 dernières ventes)</span><b class="num" style="font:700 1.4rem var(--f-display)">${money(st.revenue)}</b></div>
       <div class="promise" style="display:grid"><span>Commandes payées</span><b class="num" style="font:700 1.4rem var(--f-display)">${st.orders}</b></div>
@@ -825,6 +1199,17 @@ function productForm(p) {
     <fieldset class="field" style="border:0;padding:0;margin:0"><label>Plateformes</label><div class="pills">${PLATFORMS.map((x) => `<label class="pill" style="cursor:pointer"><input type="checkbox" data-pf-plat="${x}" ${(p.platforms || []).includes(x) ? "checked" : ""}> ${x}</label>`).join("")}</div></fieldset>
     <div class="field"><label for="pf-features">Fonctionnalités (une par ligne)</label><textarea id="pf-features" rows="4">${esc((p.features || []).join("\n"))}</textarea></div>
     <div class="field"><label for="pf-req">Configuration requise</label><textarea id="pf-req" rows="2">${esc(p.requirements)}</textarea></div>
+    <div class="field"><label for="pf-included">Ce qui est inclus (une ligne par élément)</label><textarea id="pf-included" rows="4">${esc((p.included || []).join("\n"))}</textarea></div>
+    <div class="row2">
+      <div class="field"><label for="pf-delivery">Livraison (texte affiché sur la fiche)</label><textarea id="pf-delivery" rows="3">${esc(p.delivery_info || "")}</textarea></div>
+      <div class="field"><label for="pf-lang">Langue</label><input id="pf-lang" type="text" value="${esc(p.language || "Français")}"></div>
+    </div>
+    <div class="field"><label for="pf-faq">Questions fréquentes</label><textarea id="pf-faq" rows="5" placeholder="Une question par ligne, suivie de la réponse après le signe |&#10;Faut-il internet ? | Non, il fonctionne hors ligne.">${esc((p.faq || []).map((f) => `${f.q} | ${f.a}`).join("\n"))}</textarea><small>Format : question | réponse, une par ligne.</small></div>
+    <fieldset class="panel" style="background:var(--sunk);gap:10px">
+      <legend style="font-weight:700;padding:0 6px">Livraison automatique (visible uniquement par les acheteurs)</legend>
+      <div class="field"><label for="pf-access">Lien d'accès au logiciel</label><input id="pf-access" type="url" placeholder="https://…" value="${esc(S.editingAccess?.access_url || "")}"><small>Bouton « Ouvrir le logiciel » affiché à l'acheteur juste après le paiement.</small></div>
+      <div class="field"><label for="pf-instr">Instructions pour commencer (une étape par ligne)</label><textarea id="pf-instr" rows="4">${esc(S.editingAccess?.instructions || "")}</textarea></div>
+    </fieldset>
     <div class="row2">
       <div class="field"><label for="pf-cover">Image de pochette (facultative)</label><input id="pf-cover" type="file" accept="image/*"><small>${p.cover_url ? "Une image est déjà en place." : "Sinon, une pochette est générée automatiquement."}</small></div>
       <div class="field"><label for="pf-file">Fichier d'installation</label><input id="pf-file" type="file"><small>${p.file_path ? `Actuel : ${esc(p.file_path.split("/").pop())}` : "Téléchargeable uniquement par les clients ayant une licence. 50 Mo max. sur l'offre gratuite de Supabase."}</small></div>
@@ -848,7 +1233,12 @@ async function saveProduct(form) {
     version: $("#pf-version").value.trim(), platforms: [...form.querySelectorAll("[data-pf-plat]:checked")].map((x) => x.dataset.pfPlat),
     features: $("#pf-features").value.split("\n").map((x) => x.trim()).filter(Boolean), requirements: $("#pf-req").value.trim(),
     is_published: $("#pf-pub").checked, is_featured: $("#pf-feat").checked,
+    included: $("#pf-included").value.split("\n").map((x) => x.trim()).filter(Boolean),
+    delivery_info: $("#pf-delivery").value.trim() || null, language: $("#pf-lang").value.trim() || "Français",
+    faq: $("#pf-faq").value.split("\n").map((x) => x.split("|")).filter((x) => x.length >= 2 && x[0].trim())
+      .map(([q, ...a]) => ({ q: q.trim(), a: a.join("|").trim() })),
   };
+  const access = { access_url: $("#pf-access").value.trim() || null, instructions: $("#pf-instr").value.trim() || null };
   if (DEMO) {
     if (id) Object.assign(prod(id), row); else S.products.unshift({ id: "n" + Date.now(), created_at: new Date().toISOString(), ...row });
     S.editing = null; toast("Logiciel enregistré (démonstration)"); render(); return;
@@ -868,9 +1258,11 @@ async function saveProduct(form) {
       row.file_path = path;
     }
     row.updated_at = new Date().toISOString();
-    const q = id ? sb.from("products").update(row).eq("id", id) : sb.from("products").insert(row);
-    const { error } = await q; if (error) throw error;
-    await api.catalog(); S.editing = null; toast("Logiciel enregistré"); render();
+    const q = id ? sb.from("products").update(row).eq("id", id).select("id").single() : sb.from("products").insert(row).select("id").single();
+    const { data: saved, error } = await q; if (error) throw error;
+    const acc = await sb.from("product_access").upsert({ product_id: saved.id, ...access, updated_at: new Date().toISOString() });
+    if (acc.error) throw acc.error;
+    await api.catalog(); S.editing = null; S.editingAccess = null; toast("Logiciel enregistré"); render();
   } catch (e) { msg.innerHTML = `<div class="notice bad">${esc(e.message)}</div>`; btn.disabled = false; }
 }
 
@@ -931,6 +1323,11 @@ async function loadProfile() {
   }
 }
 function afterLogin() {
+  if (S.pendingBuy && S.pendingBuy !== S.cart && S.pendingBuy.length === 1) {
+    const p = prod(S.pendingBuy[0].id); S.pendingBuy = null;
+    if (p) { $("#account-lbl").textContent = "Mon espace"; S.focusBuy = true; go("p-" + p.slug); return; }
+  }
+  S.pendingBuy = null;
   $("#account-lbl").textContent = "Mon espace";
   const r = route();
   if (cartLines().length && (r === "compte" || r === "panier")) go("panier"); else if (r === "compte" || /access_token/.test(location.hash)) go("licences"); else render();
@@ -938,11 +1335,15 @@ function afterLogin() {
 
 /* ---------------- Événements ---------------- */
 document.addEventListener("click", async (e) => {
-  const t = e.target.closest("[data-go],[data-add],[data-buy],[data-qty],[data-remove],[data-checkout],[data-tab],[data-copy],[data-download],[data-logout],[data-auth],[data-edit],[data-reset-filters],[data-stripe-connect]");
+  const t = e.target.closest("[data-go],[data-add],[data-buy],[data-qty],[data-remove],[data-checkout],[data-tab],[data-copy],[data-download],[data-logout],[data-auth],[data-edit],[data-reset-filters],[data-stripe-connect],[data-ticket-close]");
   if (!t) return;
   const d = t.dataset;
   if ("add" in d) { e.stopPropagation(); addToCart(d.add); return; }
-  if ("buy" in d) { addToCart(d.buy); go("panier"); return; }
+  if ("buy" in d) { checkout(t, [{ id: d.buy, qty: 1 }]); return; }
+  if ("ticketClose" in d) {
+    if (!DEMO) { const { error } = await sb.from("support_tickets").update({ status: "closed" }).eq("id", d.ticketClose); if (error) { toast(error.message); return; } }
+    toast("Demande close"); render(); return;
+  }
   if ("qty" in d) { const l = S.cart.find((x) => x.id === d.qty); l.qty = Math.max(1, Math.min(50, l.qty + +d.d)); saveCart(); render(); return; }
   if ("remove" in d) { S.cart = S.cart.filter((x) => x.id !== d.remove); saveCart(); render(); return; }
   if ("checkout" in d) { checkout(t); return; }
@@ -959,11 +1360,12 @@ document.addEventListener("click", async (e) => {
   if ("edit" in d) { S.editing = d.edit || null; render(); if (S.editing) setTimeout(() => $("#product-form")?.scrollIntoView({ behavior: "smooth" }), 50); return; }
   if ("stripeConnect" in d) { loadStripePanel(true); return; }
   if ("resetFilters" in d) { S.filters = { cats: [], plats: [], billing: "", sort: S.filters.sort }; S.search = ""; $("#search-input").value = ""; go("catalogue"); return; }
-  if ("go" in d) { if (d.go.startsWith("p-")) S.tab = "desc"; go(d.go); }
+  if ("go" in d) { if (d.go.startsWith("p-")) { S.tab = "desc"; S.focusBuy = "buyfocus" in d; } go(d.go); }
 });
 document.addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.matches("article.card")) e.target.click(); });
 document.addEventListener("change", (e) => {
   const t = e.target;
+  if (t.id === "accept-terms") { S.accepted = t.checked; t.closest(".terms")?.classList.remove("need"); return; }
   if (t.dataset.fcat) { const id = +t.dataset.fcat; S.filters.cats = t.checked ? [...S.filters.cats, id] : S.filters.cats.filter((x) => x !== id); go("catalogue"); }
   else if (t.dataset.fplat) { const x = t.dataset.fplat; S.filters.plats = t.checked ? [...S.filters.plats, x] : S.filters.plats.filter((y) => y !== x); render(); }
   else if (t.name === "fbill") { S.filters.billing = t.value; render(); }
@@ -975,6 +1377,15 @@ document.addEventListener("submit", async (e) => {
   if (f.id === "search-form") { S.search = $("#search-input").value; S.filters.cats = []; go("recherche"); }
   if (f.id === "auth-form") submitAuth(f);
   if (f.id === "product-form") saveProduct(f);
+  if (f.id === "ticket-form") sendTicket(f);
+  if (f.dataset.replyForm) {
+    const id = f.dataset.replyForm, reply = f.querySelector("textarea").value.trim();
+    if (!DEMO) {
+      const { error } = await sb.from("support_tickets").update({ reply, status: "answered", replied_at: new Date().toISOString() }).eq("id", id);
+      if (error) { toast(error.message); return; }
+    }
+    toast("Réponse enregistrée"); render();
+  }
   if (f.id === "review-form") {
     const pid = $("#reviews").dataset.pid;
     const row = { product_id: pid, rating: +$("#rv-rating").value, comment: $("#rv-comment").value.trim(), author_name: S.profile?.full_name || S.user.email.split("@")[0] };
@@ -990,7 +1401,7 @@ window.addEventListener("hashchange", render);
   document.title = CONFIG.SHOP_NAME;
   $("#logo-name").textContent = $("#foot-name").textContent = CONFIG.SHOP_NAME;
   $("#logo-mark").textContent = initials(CONFIG.SHOP_NAME) || "LG";
-  if (CONFIG.SUPPORT_EMAIL) $("#foot-support").textContent = "Support : " + CONFIG.SUPPORT_EMAIL;
+  $("#foot-seller").innerHTML = `© ${new Date().getFullYear()} ${esc(CONFIG.SELLER_NAME)} · ${esc(CONFIG.SELLER_ADDRESS)} · Service client : <span style="user-select:all">${esc(CONFIG.SUPPORT_EMAIL)}</span>`;
   $("#demo-bar").hidden = !DEMO;
   saveCart();
   try { await api.catalog(); }

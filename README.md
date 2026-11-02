@@ -159,3 +159,14 @@ Content-Type: application/json
 ```
 
 Réponse : `{"valid": true, ...}` ou `{"valid": false, "reason": "..."}`. Une licence = 1 poste par défaut.
+
+## Service client, livraison et conditions de vente
+
+- **Livraison automatique** : après le paiement, l'acheteur voit sa clé, le bouton « Ouvrir le logiciel »
+  et les instructions. Renseignez le *Lien d'accès* et les *Instructions* de chaque logiciel dans
+  **Administration → Modifier** (cadre « Livraison automatique », visible seulement par les acheteurs).
+- **Service client** : page « Aide » (FAQ + formulaire). Les demandes arrivent dans **Administration → Service client**.
+- **Conditions** : pages Conditions de vente, Remboursement, Livraison, Confidentialité, Mentions légales.
+  Le vendeur, l'adresse et les délais se changent dans `CONFIG` en haut de `docs/index.html`.
+  L'acheteur doit cocher l'acceptation avant de payer ; la date est enregistrée sur la commande.
+- Base de données : `supabase/migrations/002_service_client_livraison.sql`.
