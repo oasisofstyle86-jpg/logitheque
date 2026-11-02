@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-uqI7fhnStGcfeJdRBycKgWCmjJKqMIZViEGzXP0+JAI=' https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: https://oasisofstyle86-jpg.github.io https://ybbxrlwshpaerinkowan.supabase.co; connect-src https://ybbxrlwshpaerinkowan.supabase.co wss://ybbxrlwshpaerinkowan.supabase.co; form-action 'self'; base-uri 'none'; object-src 'none'; frame-src 'none'; manifest-src 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Logithèque Boutique</title>
 <meta name="description" content="Logiciels de gestion, de formation et de commerce. Licence livrée immédiatement après paiement.">
@@ -335,6 +337,11 @@ footer.foot .foot-bottom{border-top:1px solid #ffffff14;padding-block:14px calc(
 <div class="toast" id="toast" hidden></div>
 
 <script>
+/* Sécurité : la boutique refuse de s'afficher à l'intérieur d'un autre site (piège au clic). */
+if (window.top !== window.self) {
+  document.body.innerHTML = '<p style="padding:24px;font:16px sans-serif">Pour votre sécurité, ouvrez la boutique dans son propre onglet : <a href="' + location.href.split("#")[0] + '" target="_top" rel="noopener">ouvrir la boutique</a>.</p>';
+  throw new Error("Affichage dans un cadre refusé");
+}
 /* ======================================================================
    CONFIGURATION — à remplir pour passer en boutique réelle
    (laisser SUPABASE_URL vide = mode démonstration)
@@ -944,8 +951,6 @@ const LEGAL = {
     <h2>Éditeur du site et vendeur</h2>
     <p>${SELLER()}</p>
     <p>Contact : ${MAIL()}</p>
-    <h2>Hébergement</h2>
-    <p>Site : GitHub Pages (GitHub, Inc., San Francisco, États-Unis). Base de données : Supabase. Paiements : Stripe.</p>
     <h2>Propriété intellectuelle</h2>
     <p>Les logiciels, textes et images de la boutique sont protégés. Toute reproduction sans autorisation est interdite.</p>` },
 };
@@ -1042,7 +1047,7 @@ async function sendTicket(f) {
     btn.disabled = true;
     const { error } = await sb.from("support_tickets").insert(row);   // pas de .select() : un visiteur ne peut pas relire
     btn.disabled = false;
-    if (error) { out.innerHTML = `<div class="notice bad">Le message n'a pas pu être envoyé. Vérifiez les champs, ou écrivez directement à ${esc(CONFIG.SUPPORT_EMAIL)}.</div>`; return; }
+    if (error) { out.innerHTML = `<div class="notice bad">${error.code === "P0001" ? esc(error.message) : "Le message n'a pas pu être envoyé. Vérifiez les champs"} Vous pouvez aussi écrire directement à ${esc(CONFIG.SUPPORT_EMAIL)}.</div>`; return; }
   }
   f.reset(); $("#tk-name").value = row.name; $("#tk-email").value = row.email;
   out.innerHTML = `<div class="notice ok">Message envoyé. Nous vous répondons sous 2 jours ouvrés.</div>`;
@@ -1098,7 +1103,8 @@ async function pollLicenses() {
 async function licenseCards(list) {
   const access = await api.access([...new Set(list.filter((l) => l.status === "active").map((l) => l.product_id))]);
   return list.map((l) => {
-    const a = access[l.product_id] || {};
+    const a = { ...(access[l.product_id] || {}) };
+    if (a.access_url && !/^https:\/\/[^\s<>"]+$/.test(a.access_url)) a.access_url = null;
     const active = l.status === "active";
     const steps = (a.instructions || "").split(/\n+/).map((x) => x.replace(/^\s*\d+[.)]\s*/, "").trim()).filter(Boolean);
     return `<article class="license">
@@ -1388,7 +1394,7 @@ document.addEventListener("submit", async (e) => {
   }
   if (f.id === "review-form") {
     const pid = $("#reviews").dataset.pid;
-    const row = { product_id: pid, rating: +$("#rv-rating").value, comment: $("#rv-comment").value.trim(), author_name: S.profile?.full_name || S.user.email.split("@")[0] };
+    const row = { product_id: pid, rating: +$("#rv-rating").value, comment: $("#rv-comment").value.trim(), author_name: (S.profile?.full_name || S.user.email.split("@")[0]).slice(0, 60) };
     if (DEMO) { (DEMO_DATA.reviews[pid] ||= []).unshift({ ...row, created_at: new Date().toISOString() }); loadReviews(); return; }
     const { error } = await sb.from("reviews").insert({ ...row, user_id: S.user.id });
     if (error) toast(error.code === "23505" ? "Vous avez déjà donné votre avis sur ce logiciel." : error.message); else { toast("Merci pour votre avis"); await api.catalog(); loadReviews(); }

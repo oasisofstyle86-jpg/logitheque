@@ -170,3 +170,12 @@ Réponse : `{"valid": true, ...}` ou `{"valid": false, "reason": "..."}`. Une li
   Le vendeur, l'adresse et les délais se changent dans `CONFIG` en haut de `docs/index.html`.
   L'acheteur doit cocher l'acceptation avant de payer ; la date est enregistrée sur la commande.
 - Base de données : `supabase/migrations/002_service_client_livraison.sql`.
+
+## Sécurité
+
+- `docs/index.html` contient une politique de sécurité (Content-Security-Policy) : seul le script de la
+  page et la bibliothèque Supabase peuvent s'exécuter, seuls Supabase (et Stripe par redirection) sont contactés.
+  **Après toute modification du script de la page, relancez :** `python3 scripts/securite_csp.py`
+  (sinon le navigateur bloquera la page).
+- La boutique refuse de s'afficher dans un cadre d'un autre site.
+- Base de données : `supabase/migrations/003_securite.sql` (règles par rôle, fonction admin privée, anti-spam).
